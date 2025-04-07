@@ -14,7 +14,7 @@ def update_pixel():
     row = data['row']
     col = data['col']
     color = data['color']
-    # Here you would add logic to store the pixel data, e.g., in a list or database
+    # Here you would add logic to store the pixel data, e.g., in a list or databas
     return jsonify({'status': 'success'})
 
 
