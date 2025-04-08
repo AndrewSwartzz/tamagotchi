@@ -1,0 +1,109 @@
+
+{% extends "index.html" %}
+
+{% block content %}
+<style>
+  .button {
+  background-color: #ddd;
+  border: none;
+  color: black;
+  padding: 10px 20px;
+  font-size: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0px 0px;
+  cursor: pointer;
+  border-radius: 16px;
+}
+  .flex-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+  .info-column {
+    display: flex;
+    flex-direction: column;
+    width: 25%; /* Adjust as needed */
+    padding-left: 20px;
+  }
+
+  .info-box {
+    background-color: #f0f0f0;
+    border: 3px solid #333;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .info-box h2 {
+    margin-top: 0;
+    color: #ff6666;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+  }
+    .button-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Align buttons to bottom */
+    height: 100%;
+  }
+</style>
+<div class="flex-container">
+
+  <div class="flex-column">
+    <div class="button">
+    <button style="height:75px;width:120px;font-size:26px">Activities</button>
+    </div>
+    <div class="button">
+    <button style="height:75px;width:120px;font-size:35px">Clean</button>
+    </div>
+    <div class="button">
+    <button style="height:75px;width:120px;font-size:35px">Feed</button>
+    </div>
+    <div class="button">
+    <button style="height:75px;width:120px;font-size:24px">Inventory</button>
+    </div>
+    <div class="button">
+    <button style="height:75px;width:120px;font-size:35px">Shop</button>
+    </div>
+  </div>
+
+  <div class="info-column">
+    <div class="info-box">
+      <h2>Pet Status</h2>
+      <p>Health: 80%</p>
+      <p>Happiness: 65%</p>
+      <p>Hunger: 45%</p>
+      <p>Energy: 70%</p>
+    </div>
+
+    <div class="info-box">
+      <h2>Recent Activity</h2>
+      <p>✔ Fed 30 minutes ago</p>
+      <p>✔ Played 1 hour ago</p>
+      <p>✔ Cleaned 2 hours ago</p>
+      <p>⚠ Needs attention soon</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+
+<div class="tamagotchi-pet">
+    <!-- Your Tamagotchi pet would go here -->
+    <img src="https://media.tenor.com/XRTmy5DN1pYAAAAM/tamagotchi-bandai.gif" style="width: 400%; height: auto" alt="Tamagotchi Pet">
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,124 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Tamagotchi App{% endblock %}</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .tamagotchi-container {
+            position: relative;
+            width: 1200px;
+            height: 600px;
+            background-color: #ffcc00;
+            border-radius: 20px;
+            border: 8px solid #333;
+            box-shadow: 0 0 0 4px #ff6666,
+                        0 0 0 8px #333,
+                        0 10px 20px rgba(0,0,0,0.3);
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .tamagotchi-screen {
+            background-color: white;
+            border: 4px solid #333;
+            border-radius: 10px;
+            height: 475px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+.tamagotchi-buttons {
+    display: flex;
+    flex-direction: row;  /* Changed from column to row */
+    justify-content: center;  /* Center the buttons horizontally */
+    align-items: flex-end;  /* Align to bottom */
+    position: absolute;
+    bottom: 20px;  /* Distance from bottom */
+    width: 100%;  /* Full width of container */
+    padding: 0 20px;  /* Add some padding on sides */
+    gap: 100px;  /* Space between buttons */
+}
+
+.tamagotchi-button {
+    width: 30px;
+    height: 30px;
+    background-color: #ff6666;
+    border-radius: 50%;
+    border: 3px solid #333;
+    cursor: pointer;
+    position: relative;  /* Changed from absolute to relative */
+    /* Remove absolute positioning to let flexbox handle layout */
+}
+
+        .tamagotchi-button:hover {
+            background-color: #ff3333;
+        }
+
+        .tamagotchi-antenna {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 4px;
+        }
+
+        .tamagotchi-antenna-ball {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background-color: #ff6666;
+            border-radius: 50%;
+            border: 3px solid #333;
+        }
+
+        /* Tamagotchi pet styling */
+        .tamagotchi-pet {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            bottom: 300px;
+            left: 30%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="tamagotchi-container">
+        <div class="tamagotchi-antenna"></div>
+        <div class="tamagotchi-antenna-ball"></div>
+
+        <div class="tamagotchi-screen">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+
+        <div class="tamagotchi-buttons">
+            <div class="tamagotchi-button" onclick="alert('A button pressed!')"></div>
+            <div class="tamagotchi-button" onclick="alert('B button pressed!')"></div>
+            <div class="tamagotchi-button" onclick="alert('C button pressed!')"></div>
+        </div>
+
+
+    </div>
+</body>
+</html>
