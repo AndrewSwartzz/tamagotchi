@@ -105,5 +105,26 @@
 </div>
 
 
+<style>
+  /* ... your existing CSS ... */
+</style>
 
+<div class="flex-container">
+  <!-- ... your existing side buttons ... -->
+  <div class="info-column">
+    <!-- ... your pet status info boxes ... -->
+  </div>
+</div>
+
+<div class="tamagotchi-pet">
+  <img src="https://media.tenor.com/XRTmy5DN1pYAAAAM/tamagotchi-bandai.gif"
+       style="width: 400%; height: auto" alt="Tamagotchi Pet">
+</div>
+
+<!-- NEW: link or button to test the Pixel Grid -->
+<p>
+  <a href="{{ url_for('pixel_test') }}" class="button">
+    Test the Pixel Grid
+  </a>
+</p>
 {% endblock %}
