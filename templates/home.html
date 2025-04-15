@@ -55,6 +55,8 @@
     justify-content: flex-end; /* Align buttons to bottom */
     height: 100%;
   }
+
+
 </style>
 <div class="flex-container">
 
@@ -102,8 +104,7 @@
 <div class="tamagotchi-pet">
     <!-- Your Tamagotchi pet would go here -->
 
-
-    <img src="../static/duck.png" height="350" width="350"/>
+    <img src="../static/duck.png" height="350" width="350" style="float:left"/>
   <style>
   /* ... your existing CSS ... */
 </style>
@@ -116,10 +117,4 @@
 </div>
 
 
-<!-- NEW: link or button to test the Pixel Grid -->
-<p>
-  <a href="{{ url_for('pixel_test') }}" class="button">
-    Test the Pixel Grid
-  </a>
-</p>
 {% endblock %}

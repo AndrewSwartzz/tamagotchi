@@ -90,15 +90,25 @@
             border: 3px solid #333;
         }
 
-        /* Tamagotchi pet styling */
         .tamagotchi-pet {
-            width: 100px;
-            height: 100px;
-            position: absolute;
-            bottom: 300px;
-            left: 30%;
-            transform: translateX(-50%);
+        width: 100px;
+        height: 100px;
+        position: absolute;  /* Changed from relative to absolute */
+        top: 25%;            /* Center vertically */
+        left: 32%;           /* Center horizontally */
+        transform: translate(-50%, -50%) translateX(-20%); /* Centering transform + your animation */
+            animation:  moveBackAndForth 2s infinite alternate;
+
+    }
+
+    @keyframes moveBackAndForth {
+        0% {
+            transform: translate(-50%, -50%) translateX(-20%);
         }
+        100% {
+            transform: translate(-50%, -50%) translateX(20%);
+        }
+    }
     </style>
 </head>
 <body>
