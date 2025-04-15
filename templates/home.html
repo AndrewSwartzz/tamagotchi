@@ -1,31 +1,30 @@
-
 {% extends "index.html" %}
 
 {% block content %}
 <style>
   .button {
-  background-color: #ddd;
-  border: none;
-  color: black;
-  padding: 10px 20px;
-  font-size: 30px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  margin: 0px 0px;
-  cursor: pointer;
-  border-radius: 16px;
-}
+    background-color: #ddd;
+    border: none;
+    color: black;
+    padding: 10px 20px;
+    font-size: 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0px 0px;
+    cursor: pointer;
+    border-radius: 16px;
+  }
   .flex-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
 
-.flex-column {
-  display: flex;
-  flex-direction: column;
-}
+  .flex-column {
+    display: flex;
+    flex-direction: column;
+  }
 
   .info-column {
     display: flex;
@@ -49,11 +48,27 @@
     border-bottom: 1px solid #ccc;
     padding-bottom: 5px;
   }
-    .button-column {
+  .button-column {
     display: flex;
     flex-direction: column;
     justify-content: flex-end; /* Align buttons to bottom */
     height: 100%;
+  }
+
+  .stat {
+    margin-bottom: 10px;
+  }
+  .stat label {
+    margin-right: 5px;
+  }
+  progress {
+    vertical-align: middle;
+    width: 200px;
+    height: 20px;
+  }
+  .info-box span {
+    margin-left: 8px;
+    font-weight: bold;
   }
 </style>
 <div class="flex-container">
@@ -79,10 +94,26 @@
   <div class="info-column">
     <div class="info-box">
       <h2>Pet Status</h2>
-      <p>Health: 80%</p>
-      <p>Happiness: 65%</p>
-      <p>Hunger: 45%</p>
-      <p>Energy: 70%</p>
+      <div class="stat">
+        <label for="healthBar">Health:</label>
+        <progress id="healthBar" value="80" max="100"></progress>
+        <span id="healthVal">80%</span>
+      </div>
+      <div class="stat">
+        <label for="happinessBar">Happiness:</label>
+        <progress id="happinessBar" value="65" max="100"></progress>
+        <span id="happinessVal">65%</span>
+      </div>
+      <div class="stat">
+        <label for="hungerBar">Hunger:</label>
+        <progress id="hungerBar" value="45" max="100"></progress>
+        <span id="hungerVal">45%</span>
+      </div>
+      <div class="stat">
+        <label for="energyBar">Energy:</label>
+        <progress id="energyBar" value="70" max="100"></progress>
+        <span id="energyVal">70%</span>
+      </div>
     </div>
 
     <div class="info-box">
@@ -122,4 +153,29 @@
     Test the Pixel Grid
   </a>
 </p>
+
+<script>
+// Function to update the stat bars (simulated demo updates)
+function updateStats() {
+  const healthBar = document.getElementById('healthBar');
+  const happinessBar = document.getElementById('happinessBar');
+  const hungerBar = document.getElementById('hungerBar');
+  const energyBar = document.getElementById('energyBar');
+
+  // Demo logic: decrease health, happiness, and energy slightly, increase hunger over time
+  healthBar.value = Math.max(0, healthBar.value - Math.random() * 2);
+  happinessBar.value = Math.max(0, happinessBar.value - Math.random() * 2);
+  energyBar.value = Math.max(0, energyBar.value - Math.random() * 2);
+  hungerBar.value = Math.min(100, hungerBar.value + Math.random() * 2);
+
+  // Update displayed percentages
+  document.getElementById('healthVal').innerText = Math.floor(healthBar.value) + '%';
+  document.getElementById('happinessVal').innerText = Math.floor(happinessBar.value) + '%';
+  document.getElementById('hungerVal').innerText = Math.floor(hungerBar.value) + '%';
+  document.getElementById('energyVal').innerText = Math.floor(energyBar.value) + '%';
+}
+
+// Update stats every 2 seconds
+setInterval(updateStats, 2000);
+</script>
 {% endblock %}
