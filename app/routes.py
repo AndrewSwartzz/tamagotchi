@@ -4,12 +4,15 @@ from app import app
 
 
 @app.route('/')
+@app.route('/home')
 def home():
     return render_template('home.html')
 
-@app.rout('/pixel_test')
-def pixel_test():
-    return render_template('pixelTest.html')
+@app.route('/welcome')
+def welcome():
+    return render_template('welcome.html', title="Welcome")
+
+
 
 
 if __name__ == '__main__':
