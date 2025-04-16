@@ -166,7 +166,7 @@ function updateStats() {
   healthBar.value = Math.max(0, healthBar.value - Math.random() * 2);
   happinessBar.value = Math.max(0, happinessBar.value - Math.random() * 2);
   energyBar.value = Math.max(0, energyBar.value - Math.random() * 2);
-  hungerBar.value = Math.min(100, hungerBar.value + Math.random() * 2);
+  hungerBar.value = Math.max(0, hungerBar.value + Math.random() * 2);
 
   // Update displayed percentages
   document.getElementById('healthVal').innerText = Math.floor(healthBar.value) + '%';
