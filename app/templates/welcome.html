@@ -1,24 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "index.html" %}
+
+{% block content %}
+
+<html>
+<head>
+<style>
+h1 {text-align: center;}
+.container {
+  height: 200px;
+  position: relative;
+  border: 3px solid black;
+}
+
+.center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+</style>
 </head>
 <body>
-    <div class="tamagotchi-container">
-        <div class="tamagotchi-antenna"></div>
-        <div class="tamagotchi-antenna-ball"></div>
 
-        <div class="tamagotchi-screen">
-            {% block content %}
+<h1>Welcome to the Tamagotchi Web App!</h1>
 
-            {% endblock %}
-        </div>
-
-        <div class="tamagotchi-buttons">
-            <div class="tamagotchi-button" onclick="alert('A button pressed!')"></div>
-            <div class="tamagotchi-button" onclick="alert('B button pressed!')"></div>
-            <div class="tamagotchi-button" onclick="alert('C button pressed!')"></div>
-        </div>
+<div class="center">
+    <button style="height:140px;width:240px;font-size:26px;margin-right:100px">Sign In</button>
+    <a href="/register">
+    <button style="height:140px;width:240px;font-size:26px">Register</button>
+    </a>
+  </div>
 
 
-    </div>
-</body>
-</html>
+
+
+
+{% endblock %}
