@@ -1,1 +1,82 @@
-<!-- Coming soon -->
+{% extends "index.html" %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+  .shop-container {
+    width: 80%;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .money-display {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  .item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .item button {
+    padding: 5px 10px;
+    background: #28a745;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  .item button:hover {
+    background: #218838;
+  }
+</style>
+
+<div class="shop-container">
+  <div class="money-display">Money: <span id="money">100</span> coins</div>
+
+  <div class="item">
+    <div>Food - 10 coins</div>
+    <button onclick="buyItem('Food', 10)">Buy</button>
+  </div>
+  <div class="item">
+    <div>Collar - 50 coins</div>
+    <button onclick="buyItem('Collar', 50)">Buy</button>
+  </div>
+  <div class="item">
+    <div>Toy - 30 coins</div>
+    <button onclick="buyItem('Toy', 30)">Buy</button>
+  </div>
+</div>
+
+<script>
+  let money = 100;
+  let inventory = {
+    Food: 0,
+    Collar: 0,
+    Toy: 0
+  };
+
+  function updateMoneyDisplay() {
+    document.getElementById('money').textContent = money;
+  }
+
+  function buyItem(item, cost) {
+    if (money >= cost) {
+      money -= cost;
+      inventory[item] = (inventory[item] || 0) + 1;
+      updateMoneyDisplay();
+      alert('You bought a ' + item + '!');
+    } else {
+      alert('Insufficient funds to buy ' + item);
+    }
+  }
+</script>
+{% endblock %}
