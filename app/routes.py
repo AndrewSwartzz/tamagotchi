@@ -57,6 +57,10 @@ def logout():
     logout_user()
     return redirect(url_for('welcome'))
 
+@app.route('/shop')
+def shop():
+    return render_template('shop.html', title="Shop")
+
 
 if __name__ == '__main__':
     app.run(debug=True)

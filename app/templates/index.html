@@ -97,18 +97,24 @@
         top: 25%;            /* Center vertically */
         left: 32%;           /* Center horizontally */
         transform: translate(-50%, -50%) translateX(-20%); /* Centering transform + your animation */
-            animation:  moveBackAndForth 2s infinite alternate;
+            animation:  jumping-image-abrupt 0.5s steps(1, end) infinite;
 
     }
 
-    @keyframes moveBackAndForth {
-        0% {
-            transform: translate(-50%, -50%) translateX(-20%);
-        }
-        100% {
-            transform: translate(-50%, -50%) translateX(20%);
-        }
-    }
+.jumping-image-abrupt {
+  animation: jumpAbrupt 1s steps(1, end) infinite;
+}
+
+@keyframes jumpAbrupt {
+  0%, 100% {
+    transform: translateX(0);
+
+  }
+  50% {
+    transform: translateX(30px);
+  }
+}
+
     </style>
 </head>
 <body>
