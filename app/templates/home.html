@@ -1,7 +1,6 @@
 {% extends "index.html" %}
 
 {% block content %}
-<!-- empty html comment - delete me -->
 
 <style>
   .button {
@@ -82,14 +81,16 @@
     <div class="button">
     <button style="height:75px;width:120px;font-size:35px">Clean</button>
     </div>
-    <div class="button">
-    <button style="height:75px;width:120px;font-size:35px">Feed</button>
+    <div class="button" >
+    <button id="feedBtn" style="height:75px;width:120px;font-size:35px">Feed</button>
     </div>
     <div class="button">
     <button style="height:75px;width:120px;font-size:24px">Inventory</button>
     </div>
     <div class="button">
-    <button style="height:75px;width:120px;font-size:35px">Shop</button>
+      <a href="{{ url_for('shop') }}">
+        <button style="height:75px;width:120px;font-size:35px">Shop</button>
+      </a>
     </div>
   </div>
 
@@ -97,24 +98,28 @@
     <div class="info-box">
       <h2>Pet Status</h2>
       <div class="stat">
+        <label>Money:</label>
+        <span id="moneyDisplay">{{ current_user.money }}</span> coins
+      </div>
+      <div class="stat">
         <label for="healthBar">Health:</label>
-        <progress id="healthBar" value="80" max="100"></progress>
-        <span id="healthVal">80%</span>
+        <progress id="healthBar" value="{{ current_user.health }}" max="100"></progress>
+        <span id="healthVal">{{ current_user.health }}%</span>
       </div>
       <div class="stat">
         <label for="happinessBar">Happiness:</label>
-        <progress id="happinessBar" value="65" max="100"></progress>
-        <span id="happinessVal">65%</span>
+        <progress id="happinessBar" value="{{ current_user.happiness }}" max="100"></progress>
+        <span id="happinessVal">{{ current_user.happiness }}%</span>
       </div>
       <div class="stat">
         <label for="hungerBar">Hunger:</label>
-        <progress id="hungerBar" value="45" max="100"></progress>
-        <span id="hungerVal">45%</span>
+        <progress id="hungerBar" value="{{ current_user.hunger }}" max="100"></progress>
+        <span id="hungerVal">{{ current_user.hunger }}%</span>
       </div>
       <div class="stat">
         <label for="energyBar">Energy:</label>
-        <progress id="energyBar" value="70" max="100"></progress>
-        <span id="energyVal">70%</span>
+        <progress id="energyBar" value="{{ current_user.energy }}" max="100"></progress>
+        <span id="energyVal">{{ current_user.energy }}%</span>
       </div>
     </div>
 
@@ -155,27 +160,38 @@
 </p>
 
 <script>
-// Function to update the stat bars (simulated demo updates)
-function updateStats() {
-  const healthBar = document.getElementById('healthBar');
-  const happinessBar = document.getElementById('happinessBar');
-  const hungerBar = document.getElementById('hungerBar');
-  const energyBar = document.getElementById('energyBar');
+// No local callApi; use global helper with CSRF support
 
-  // Demo logic: decrease health, happiness, and energy slightly, increase hunger over time
-  healthBar.value = Math.max(0, healthBar.value - Math.random() * 2);
-  happinessBar.value = Math.max(0, happinessBar.value - Math.random() * 2);
-  energyBar.value = Math.max(0, energyBar.value - Math.random() * 2);
-  hungerBar.value = Math.max(0, hungerBar.value + Math.random() * 2);
+function refreshBars(d) {
+  healthBar.value    = d.health;
+  happinessBar.value = d.happiness;
+  hungerBar.value    = d.hunger;
+  energyBar.value    = d.energy;
 
-  // Update displayed percentages
-  document.getElementById('healthVal').innerText = Math.floor(healthBar.value) + '%';
-  document.getElementById('happinessVal').innerText = Math.floor(happinessBar.value) + '%';
-  document.getElementById('hungerVal').innerText = Math.floor(hungerBar.value) + '%';
-  document.getElementById('energyVal').innerText = Math.floor(energyBar.value) + '%';
+  healthVal.textContent    = d.health + '%';
+  happinessVal.textContent = d.happiness + '%';
+  hungerVal.textContent    = d.hunger + '%';
+  energyVal.textContent    = d.energy + '%';
+  document.getElementById('moneyDisplay').textContent = d.money;
 }
 
-// Update stats every 2 seconds
-setInterval(updateStats, 2000);
+const healthBar    = document.getElementById('healthBar');
+const happinessBar = document.getElementById('happinessBar');
+const hungerBar    = document.getElementById('hungerBar');
+const energyBar    = document.getElementById('energyBar');
+const healthVal    = document.getElementById('healthVal');
+const happinessVal = document.getElementById('happinessVal');
+const hungerVal    = document.getElementById('hungerVal');
+const energyVal    = document.getElementById('energyVal');
+
+document.getElementById('feedBtn').addEventListener('click', async () => {
+  const data = await callApi('/api/feed');
+  refreshBars(data);
+});
+// Every 5 seconds ask server to decay stats
+setInterval(async () => {
+  const data = await callApi('/api/decay');
+  refreshBars(data);
+}, 5000);
 </script>
 {% endblock %}

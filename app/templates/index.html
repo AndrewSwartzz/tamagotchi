@@ -3,6 +3,7 @@
 <html>
 <head>
     <title>{% block title %}Tamagotchi App{% endblock %}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         body {
             font-family: 'Courier New', monospace;
@@ -131,4 +132,21 @@
 
     </div>
 </body>
+<script>
+  // Global helper: callApi(url, body) automatically sends CSRF header
+  function callApi(url, body = {}) {
+    const csrfToken = document
+      .querySelector('meta[name="csrf-token"]')
+      .getAttribute('content');
+
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify(body)
+    }).then(r => r.json());
+  }
+</script>
 </html>

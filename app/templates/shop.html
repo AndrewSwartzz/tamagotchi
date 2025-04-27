@@ -1,1 +1,82 @@
-<!-- Coming soon -->
+{% extends "index.html" %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+  .shop-container {
+    width: 80%;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .money-display {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  .item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .item button {
+    padding: 5px 10px;
+    background: #28a745;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  .item button:hover {
+    background: #218838;
+  }
+</style>
+
+<div style="margin: 20px;">
+  <a href="{{ url_for('home') }}" style="background:#ddd;
+      border:none; color:black; padding:10px 20px; font-size:20px;
+      text-decoration:none; border-radius:8px;">
+    ← Back
+  </a>
+</div>
+
+<div class="shop-container">
+  <div class="money-display">Money: <span id="moneyDisplay">{{ current_user.money }}</span> coins</div>
+
+  <div class="item">
+    <div>Food - 10 coins</div>
+    <button onclick="buy('Food')">Buy</button>
+  </div>
+  <div class="item">
+    <div>Collar - 5 coins</div>
+    <button onclick="buy('Collar')">Buy</button>
+  </div>
+  <div class="item">
+    <div>Toy - 30 coins</div>
+    <button onclick="buy('Toy')">Buy</button>
+  </div>
+</div>
+
+<script>
+function refreshMoney(val) {
+  document.getElementById('moneyDisplay').textContent = val;
+}
+
+async function buy(item) {
+  const data = await callApi('/api/buy', { item });
+  if (!data.success) {
+    alert('Not enough money');
+    return;
+  }
+  refreshMoney(data.money);
+  alert('You bought a ' + item + '!');
+}
+</script>
+{% endblock %}

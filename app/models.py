@@ -9,8 +9,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from app import app, db, login
 
-from app import db
-
 
 
 
@@ -23,6 +21,11 @@ class User(UserMixin, db.Model):
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
     last_seen: so.Mapped[Optional[datetime]] = so.mapped_column(
         default=lambda: datetime.now(timezone.utc))
+    money: so.Mapped[int] = so.mapped_column(sa.Integer, default=100)
+    health: so.Mapped[int] = so.mapped_column(sa.Integer, default=80)
+    happiness: so.Mapped[int] = so.mapped_column(sa.Integer, default=65)
+    hunger: so.Mapped[int] = so.mapped_column(sa.Integer, default=45)
+    energy: so.Mapped[int] = so.mapped_column(sa.Integer, default=70)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -37,7 +40,3 @@ class User(UserMixin, db.Model):
 @login.user_loader
 def load_user(id):
     return db.session.get(User, int(id))
-
-
-
-
