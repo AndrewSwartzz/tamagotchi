@@ -1,0 +1,103 @@
+{% extends "index.html" %}
+
+{% block content %}
+<style>
+  .death-screen {
+    text-align: center;
+    padding: 30px;
+    animation: fadeIn 2s;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .rip-tombstone {
+    font-size: 5rem;
+    margin: 20px 0;
+    text-shadow: 3px 3px 0 #333;
+  }
+
+  .pet-image {
+    width: 150px;
+    height: 150px;
+    opacity: 0.7;
+    margin: 20px auto;
+  }
+
+  .death-message {
+    font-size: 1.5rem;
+    margin: 20px 0;
+    color: #333;
+  }
+
+  .dates {
+    font-style: italic;
+    margin: 10px 0;
+  }
+
+  .button-container {
+    margin-top: 30px;
+  }
+
+  .btn-resurrect {
+    background-color: #ff6666;
+    color: white;
+    border: 3px solid #333;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin: 0 10px;
+  }
+
+  .btn-graveyard {
+    background-color: #333;
+    color: white;
+    border: 3px solid #666;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin: 0 10px;
+  }
+</style>
+
+<div class="death-screen">
+  <div class="rip-tombstone"><i>Rest In Peace</i></div>
+
+  <img class="pet-image"
+       src="../static/duckdeath.gif"
+       alt="{{ pet.pet_name }}">
+
+  <div class="death-message">
+    {{ pet.pet_name }} the {{ pet.pet_type|title }} has passed away
+  </div>
+
+  <div class="dates">
+    {% if pet.cause_of_death %}
+      <p>Cause: {{ pet.cause_of_death }}</p>
+    {% endif %}
+    <p>Died on: {{ pet.death_time.strftime('%B %d, %Y at %H:%M') }}</p>
+  </div>
+
+  <div class="button-container">
+    <button class="btn-graveyard" onclick="window.location.href='/graveyard'">
+      Visit Graveyard
+    </button>
+    <button class="btn-resurrect" onclick="window.location.href='/adopt'">
+      Adopt New Pet
+    </button>
+  </div>
+</div>
+
+<script>
+  // Play sad sound effect
+  window.onload = function() {
+    const audio = new Audio('{{ url_for("static", filename="sad.mp3") }}');
+    audio.volume = 0.3;
+    audio.play().catch(e => console.log("Audio play failed:", e));
+  };
+</script>
+{% endblock %}

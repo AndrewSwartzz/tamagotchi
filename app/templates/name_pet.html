@@ -1,0 +1,40 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<style>
+    h1 {text-align: center;}
+
+    img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+    button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+    input {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+</style>
+
+<h1>You're adopting a {{ selected_pet }}!</h1>
+<img src="../static/{{ selected_pet }}.png"
+     alt="{{ selected_pet }}" width="300">
+<br>
+
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <input type="text" name="pet_name" placeholder="Name your pet" required size="50">
+    <br>
+    <button type="submit" style="width: 200px; height: 50px;" >Submit</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<head>
+<style>
+h1 {text-align: center;}
+.container {
+  height: 200px;
+  position: relative;
+  border: 3px solid black;
+}
+
+.center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.left {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 25%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.right {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 75%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+img {
+  width: 240px;
+  height: 240px;
+  padding: 10px;
+  border: 5px solid black;
+  margin: 0;
+  cursor: pointer;
+}
+
+img:hover {
+  border-color: #ff6666;
+}
+
+.selected {
+  border-color: #ff6666;
+  box-shadow: 0 0 20px #ff6666;
+}
+</style>
+</head>
+<body>
+
+<h1>Choose Your Pet</h1>
+
+<form action="/adopt" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+  <div class="left">
+    <label>
+      <input type="radio" name="pet" value="duck" style="display: none;">
+      <img src="../static/duck.png" height="240" width="240" onclick="selectPet(this)" />
+    </label>
+  </div>
+
+  <div class="center">
+    <label>
+      <input type="radio" name="pet" value="duckgreen" style="display: none;">
+      <img src="../static/duckgreen.png" height="240" width="240" onclick="selectPet(this)" />
+    </label>
+  </div>
+
+  <div class="right">
+    <label>
+      <input type="radio" name="pet" value="duckhair" style="display: none;">
+      <img src="../static/duckhair.png" height="240" width="240" onclick="selectPet(this)" />
+    </label>
+  </div>
+
+  <div style="text-align: center; margin-top: 350px;">
+    <button type="submit" style="padding: 10px 20px; font-size: 16px;">Confirm Selection</button>
+  </div>
+</form>
+
+<script>
+function selectPet(element) {
+  // Remove selected class from all images
+  const allImages = document.querySelectorAll('img');
+  allImages.forEach(img => img.classList.remove('selected'));
+
+  // Add selected class to clicked image
+  element.classList.add('selected');
+
+  // Check the corresponding radio button
+  const radioInput = element.parentElement.querySelector('input[type="radio"]');
+  radioInput.checked = true;
+}
+</script>
+
+{% endblock %}

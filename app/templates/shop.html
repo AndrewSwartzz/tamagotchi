@@ -2,81 +2,105 @@
 
 {% block content %}
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-  }
   .shop-container {
-    width: 80%;
-    margin: 20px auto;
-    background: #fff;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
   }
-  .money-display {
-    font-size: 24px;
-    margin-bottom: 20px;
+  .category {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .category h2 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
   }
   .item {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
   }
   .item button {
-    padding: 5px 10px;
-    background: #28a745;
-    color: #fff;
+    background: #4CAF50;
+    color: white;
     border: none;
+    padding: 3px 8px;
+    border-radius: 3px;
     cursor: pointer;
   }
-  .item button:hover {
-    background: #218838;
+  .item button:disabled {
+    background: #ccc;
+  }
+  .currency-display {
+    text-align: center;
+    font-size: 1.5em;
+    margin: 10px 0;
   }
 </style>
 
-<div style="margin: 20px;">
-  <a href="{{ url_for('home') }}" style="background:#ddd;
-      border:none; color:black; padding:10px 20px; font-size:20px;
-      text-decoration:none; border-radius:8px;">
-    ← Back
-  </a>
+<div class="currency-display">
+  Coins: <span id="currency">{{ current_user.currency }}</span>
 </div>
 
-<div class="shop-container">
-  <div class="money-display">Money: <span id="moneyDisplay">{{ current_user.money }}</span> coins</div>
-
-  <div class="item">
-    <div>Food - 10 coins</div>
-    <button onclick="buy('Food')">Buy</button>
-  </div>
-  <div class="item">
-    <div>Collar - 5 coins</div>
-    <button onclick="buy('Collar')">Buy</button>
-  </div>
-  <div class="item">
-    <div>Toy - 30 coins</div>
-    <button onclick="buy('Toy')">Buy</button>
-  </div>
+<div class="shop-container" id="shop-container">
+  <!-- Will be populated by JavaScript -->
+  Loading shop...
 </div>
 
 <script>
-function refreshMoney(val) {
-  document.getElementById('moneyDisplay').textContent = val;
-}
+  async function loadShop() {
+    const response = await fetch('/api/store/items');
+    const data = await response.json();
 
-async function buy(item) {
-  const data = await callApi('/api/buy', { item });
-  if (!data.success) {
-    alert('Not enough money');
-    return;
+    let html = '';
+    for (const [category, items] of Object.entries(data)) {
+      if (category === 'currency') continue;
+
+      html += `<div class="category">
+        <h2>${category.charAt(0).toUpperCase() + category.slice(1)}</h2>`;
+
+      for (const [item, price] of Object.entries(items)) {
+        const canAfford = price <= data.currency;
+        html += `<div class="item">
+          <span>${item.replace('_', ' ')} (${price} coins)</span>
+          <button onclick="buyItem('${category}', '${item}', ${price})"
+                  ${canAfford ? '' : 'disabled'}>
+            Buy
+          </button>
+        </div>`;
+      }
+
+      html += `</div>`;
+    }
+
+    document.getElementById('shop-container').innerHTML = html;
+    document.getElementById('currency').textContent = data.currency;
   }
-  refreshMoney(data.money);
-  alert('You bought a ' + item + '!');
-}
+
+  async function buyItem(type, name, price) {
+    const response = await fetch('/api/store/buy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token() }}'
+      },
+      body: JSON.stringify({ type, name })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert(`You bought a ${name.replace('_', ' ')}!`);
+      loadShop(); // Refresh the shop display
+    } else {
+      alert(result.error || "Purchase failed");
+    }
+  }
+
+  // Load shop when page opens
+  loadShop();
 </script>
 {% endblock %}

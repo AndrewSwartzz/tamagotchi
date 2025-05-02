@@ -64,7 +64,7 @@
   }
   progress {
     vertical-align: middle;
-    width: 200px;
+    width: 190px;
     height: 20px;
   }
   .info-box span {
@@ -78,11 +78,11 @@
     <div class="button">
     <button style="height:75px;width:120px;font-size:26px">Activities</button>
     </div>
-    <div class="button">
-    <button style="height:75px;width:120px;font-size:35px">Clean</button>
+    <div class="button" >
+    <button onclick="api_clean()" id="cleanBtn" style="height:75px;width:120px;font-size:35px">Clean</button>
     </div>
     <div class="button" >
-    <button id="feedBtn" style="height:75px;width:120px;font-size:35px">Feed</button>
+    <button onclick="api_feed()" id="feedBtn" style="height:75px;width:120px;font-size:35px">Feed</button>
     </div>
     <div class="button">
     <button style="height:75px;width:120px;font-size:24px">Inventory</button>
@@ -96,39 +96,33 @@
 
   <div class="info-column">
     <div class="info-box">
-      <h2>Pet Status</h2>
+      <h2>{{ pet.username }}</h2>
       <div class="stat">
         <label>Money:</label>
-        <span id="moneyDisplay">{{ current_user.money }}</span> coins
+        <span id="moneyDisplay">{{ current_user.currency }}</span> coins
       </div>
       <div class="stat">
         <label for="healthBar">Health:</label>
-        <progress id="healthBar" value="{{ current_user.health }}" max="100"></progress>
-        <span id="healthVal">{{ current_user.health }}%</span>
+        <progress id="healthBar" value="{{ pet.health }}" max="100"></progress>
+        <span id="healthVal">{{ pet.health }}%</span>
       </div>
-      <div class="stat">
-        <label for="happinessBar">Happiness:</label>
-        <progress id="happinessBar" value="{{ current_user.happiness }}" max="100"></progress>
-        <span id="happinessVal">{{ current_user.happiness }}%</span>
-      </div>
+<div class="stat">
+    <label for="cleanlinessBar">Cleanliness:</label>
+    <progress id="cleanlinessBar" value="{{ pet.cleanliness }}" max="100"></progress>
+    <span id="cleanlinessVal">{{ pet.cleanliness }}%</span>
+</div>
       <div class="stat">
         <label for="hungerBar">Hunger:</label>
-        <progress id="hungerBar" value="{{ current_user.hunger }}" max="100"></progress>
-        <span id="hungerVal">{{ current_user.hunger }}%</span>
-      </div>
-      <div class="stat">
-        <label for="energyBar">Energy:</label>
-        <progress id="energyBar" value="{{ current_user.energy }}" max="100"></progress>
-        <span id="energyVal">{{ current_user.energy }}%</span>
+        <progress id="hungerBar" value="{{ pet.hunger }}" max="100"></progress>
+        <span id="hungerVal">{{ pet.hunger }}%</span>
       </div>
     </div>
 
     <div class="info-box">
-      <h2>Recent Activity</h2>
-      <p>✔ Fed 30 minutes ago</p>
-      <p>✔ Played 1 hour ago</p>
-      <p>✔ Cleaned 2 hours ago</p>
-      <p>⚠ Needs attention soon</p>
+      <h2>Info</h2>
+      <p>Mood: {{ pet.mood }}</p>
+      <p>Personality: {{ pet.personality }}</p>
+      <p>Clothing: {{ pet.clothing }}</p>
     </div>
   </div>
 </div>
@@ -141,11 +135,23 @@
     <!-- Your Tamagotchi pet would go here -->
 
 
-    <img src="../static/duck.png" height="350" width="350"/>
+    <img src="../static/{{ pet.pet_type }}.png" height="350" width="350" class="jumping-image-abrupt" id="pet-image"/>
+
+    <!-- Conditional accessory -->
+    {% if pet.clothing and pet.clothing != 'Basic' %}
+    <img src="../static/accessories/{{ pet.clothing }}.png"
+         class="jumping-image-abrupt accessory-image"
+         style="position: absolute;
+                top: -9%;
+                left: -9%;
+                width: 365px;
+                z-index: 10;"/>
+    {% endif %}
+
+
   <style>
   /* ... your existing CSS ... */
 </style>
-
 <div class="flex-container">
   <!-- ... your existing side buttons ... -->
   <div class="info-column">
@@ -163,35 +169,96 @@
 // No local callApi; use global helper with CSRF support
 
 function refreshBars(d) {
-  healthBar.value    = d.health;
-  happinessBar.value = d.happiness;
-  hungerBar.value    = d.hunger;
-  energyBar.value    = d.energy;
+    healthBar.value = d.health;
+    cleanlinessBar.value = d.cleanliness;  // Changed from happiness
+    hungerBar.value = d.hunger;
+    // Remove energy references if not used
 
-  healthVal.textContent    = d.health + '%';
-  happinessVal.textContent = d.happiness + '%';
-  hungerVal.textContent    = d.hunger + '%';
-  energyVal.textContent    = d.energy + '%';
-  document.getElementById('moneyDisplay').textContent = d.money;
+    healthVal.textContent = d.health + '%';
+    cleanlinessVal.textContent = d.cleanliness + '%';  // Changed from happiness
+    hungerVal.textContent = d.hunger + '%';
+    document.getElementById('moneyDisplay').textContent = d.money;
 }
 
-const healthBar    = document.getElementById('healthBar');
-const happinessBar = document.getElementById('happinessBar');
-const hungerBar    = document.getElementById('hungerBar');
-const energyBar    = document.getElementById('energyBar');
-const healthVal    = document.getElementById('healthVal');
-const happinessVal = document.getElementById('happinessVal');
-const hungerVal    = document.getElementById('hungerVal');
-const energyVal    = document.getElementById('energyVal');
+// Update these variable declarations:
+const healthBar = document.getElementById('healthBar');
+const cleanlinessBar = document.getElementById('cleanlinessBar');  // Changed
+const hungerBar = document.getElementById('hungerBar');
+const healthVal = document.getElementById('healthVal');
+const cleanlinessVal = document.getElementById('cleanlinessVal');  // Changed
+const hungerVal = document.getElementById('hungerVal');
+
 
 document.getElementById('feedBtn').addEventListener('click', async () => {
-  const data = await callApi('/api/feed');
-  refreshBars(data);
+    const data = await callApi('/api/feed');
+    if (data.message) {
+        alert(data.message);  // Show the message in an alert
+    }
+    refreshBars(data);
+});
+
+document.getElementById('cleanBtn').addEventListener('click', async () => {
+    const data = await callApi('/api/clean');
+    if (data.message) {
+        alert(data.message);  // Show the message in an alert
+    }
+    refreshBars(data);
 });
 // Every 5 seconds ask server to decay stats
+
 setInterval(async () => {
-  const data = await callApi('/api/decay');
-  refreshBars(data);
-}, 5000);
+    try {
+        const data = await callApi('/api/decay');
+
+        if (data.status === "dead") {
+            // Show death message with a delay
+            alert(data.message);
+            // Redirect after 2 seconds (let user read the message)
+            setTimeout(() => {
+                window.location.href = data.redirect;
+            }, 2000);
+        } else {
+            refreshBars(data);
+        }
+    } catch (error) {
+        console.error("Decay error:", error);
+    }
+}, 50);
+// Changed back to 5000ms (5 seconds) from 5ms
+async function callApi(endpoint, method = 'POST', body = null) {
+    const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'  // If using Flask-WTF CSRF
+        },
+        body: body ? JSON.stringify(body) : null
+    });
+    return await response.json();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get references to the elements
+    const petImg = document.getElementById('pet-image');
+    const accessoryImg = document.querySelector('.accessory-image');
+
+    // Only proceed if there's an accessory
+    if (accessoryImg) {
+        // Remove existing animation classes
+        petImg.classList.remove('jumping-image-abrupt');
+        accessoryImg.classList.remove('jumping-image-abrupt');
+
+        // Force reflow to reset animations
+        void petImg.offsetWidth;
+        void accessoryImg.offsetWidth;
+
+        // Add animation class simultaneously after a brief delay
+        setTimeout(() => {
+            petImg.classList.add('jumping-image-abrupt');
+            accessoryImg.classList.add('jumping-image-abrupt');
+        }, 50);
+    }
+});
 </script>
 {% endblock %}
+</div>
