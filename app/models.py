@@ -2,7 +2,9 @@ from datetime import datetime, timezone
 from typing import Optional, List
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-from flask_login import UserMixin
+from flask_login import UserMixin, current_user
+from sqlalchemy import JSON
+from sqlalchemy.orm import mapped_column, Mapped
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login
 
@@ -27,33 +29,16 @@ class Pet(db.Model):
 
 class Inventory(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    toys: so.Mapped[list[str]] = so.mapped_column(sa.JSON, default=list)
-    hats: so.Mapped[list[str]] = so.mapped_column(sa.JSON, default=list)
-    collars: so.Mapped[list[str]] = so.mapped_column(sa.JSON, default=list)
-    equipped_hat: so.Mapped[Optional[str]] = so.mapped_column(sa.String(64))
-    equipped_collar: so.Mapped[Optional[str]] = so.mapped_column(sa.String(64))
-    equipped_toy: so.Mapped[Optional[str]] = so.mapped_column(sa.String(64))
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('user.id'))
 
-    # Relationship with User
-    user_id: so.Mapped[Optional[int]] = so.mapped_column(sa.ForeignKey('user.id'))
+    # Use proper SQLAlchemy 2.0 typing
+    toys: so.Mapped[dict] = so.mapped_column(sa.JSON, default=dict)
+    hats: so.Mapped[dict] = so.mapped_column(sa.JSON, default=dict)
+    collars: so.Mapped[dict] = so.mapped_column(sa.JSON, default=dict)
+
+    # Relationship (optional, since User has the main relationship)
     user: so.Mapped['User'] = so.relationship(back_populates='inventory')
 
-    def add_item(self, item_type: str, item_name: str):
-        """Helper method to add items safely"""
-        items = getattr(self, item_type)
-        if item_name not in items:
-            items.append(item_name)
-            setattr(self, item_type, items)
-            return True
-        return False
-
-    def equip_item(self, item_type: str, item_name: str):
-        """Equip an item from inventory"""
-        items = getattr(self, item_type)
-        if item_name in items:
-            setattr(self, f'equipped_{item_type}', item_name)
-            return True
-        return False
 
 class User(UserMixin, db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
@@ -71,15 +56,12 @@ class User(UserMixin, db.Model):
         uselist=False  # Ensures one-to-one
     )
 
-    # Relationship with Inventory
-    inventory: so.Mapped[Optional['Inventory']] = so.relationship(
-        back_populates='user',
-        cascade='all, delete-orphan',
-        single_parent=True,
-        uselist=False
-    )
-
     graves: so.Mapped[List['Graveyard']] = so.relationship(back_populates='user')
+
+    inventory: so.Mapped['Inventory'] = so.relationship(
+        backref='owner',
+        uselist=False,  # One-to-one relationship
+        cascade='all, delete-orphan')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -90,23 +72,34 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
+
+def default_toys():
+    return {
+        "Blue_Ball": {"price": 10, "displayName": "Blue Ball"},
+        "Pink_Ball": {"price": 15, "displayName": "Pink Ball"},
+        "Football": {"price": 20, "displayName": "Football"}
+    }
+
+def default_hats():
+    return {
+        "Tree_Hat": {"price": 25, "displayName": "Tree Hat"},
+        "Checker_Hat": {"price": 30, "displayName": "Checker Hat"},
+        "IC_Hat": {"price": 35, "displayName": "Ice Cream Hat"}
+    }
+
+def default_collars():
+    return {
+        "Red_Collar": {"price": 20, "displayName": "Red Collar"},
+        "Blue_green_Collar": {"price": 25, "displayName": "Blue-Green Collar"},
+        "Rainbow_Collar": {"price": 50, "displayName": "Rainbow Collar"}
+    }
+
 class Store(db.Model):
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    toys: so.Mapped[dict] = so.mapped_column(sa.JSON, default={
-        "blue_ball": 10,
-        "pink_ball": 15,
-        "football": 20
-    })
-    hats: so.Mapped[dict] = so.mapped_column(sa.JSON, default={
-        "tree_hat": 25,
-        "checker_hat": 30,
-        "ic_hat": 35
-    })
-    collars: so.Mapped[dict] = so.mapped_column(sa.JSON, default={
-        "red_collar": 20,
-        "blue_green_collar": 25,
-        "rainbow_collar": 50
-    })
+    id: Mapped[int] = mapped_column(primary_key=True)
+    toys: Mapped[dict] = mapped_column(JSON, default=default_toys)
+    hats: Mapped[dict] = mapped_column(JSON, default=default_hats)
+    collars: Mapped[dict] = mapped_column(JSON, default=default_collars)
 
 class Graveyard(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
@@ -129,11 +122,13 @@ def load_user(id):
 
 def init_user_inventory(user: User):
     """Initialize inventory for a user if it doesn't exist"""
-    if not user.inventory:
+    if not user.inventory:  # Check if inventory exists
         inventory = Inventory(
-            toys=[],  # Starter items
-            collars=[],
-            hats=[]
+            user_id=user.id,  # Explicitly set user_id
+            toys=[],  # Empty list or starter items
+            hats=[],
+            collars=[]
         )
-        user.inventory = inventory
         db.session.add(inventory)
+        # No need to explicitly assign to user.inventory
+        # because backref handles it

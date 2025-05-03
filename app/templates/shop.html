@@ -1,106 +1,70 @@
 {% extends "index.html" %}
-
 {% block content %}
-<style>
-  .shop-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding: 20px;
-  }
-  .category {
-    background: white;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  .category h2 {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-  }
-  .item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px dashed #eee;
-  }
-  .item button {
-    background: #4CAF50;
-    color: white;
-    border: none;
-    padding: 3px 8px;
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  .item button:disabled {
-    background: #ccc;
-  }
-  .currency-display {
-    text-align: center;
-    font-size: 1.5em;
-    margin: 10px 0;
-  }
-</style>
+<h2>Pet Shop</h2>
+<p>Your Balance: <span id="currency">{{ current_user.currency }}</span></p>
 
-<div class="currency-display">
-  Coins: <span id="currency">{{ current_user.currency }}</span>
-</div>
+<div id="shop-items">
+    <h3>Toys</h3>
+    <ul id="toys-list"></ul>
 
-<div class="shop-container" id="shop-container">
-  <!-- Will be populated by JavaScript -->
-  Loading shop...
+    <h3>Hats</h3>
+    <ul id="hats-list"></ul>
+
+    <h3>Collars</h3>
+    <ul id="collars-list"></ul>
 </div>
 
 <script>
-  async function loadShop() {
-    const response = await fetch('/api/store/items');
-    const data = await response.json();
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-    let html = '';
-    for (const [category, items] of Object.entries(data)) {
-      if (category === 'currency') continue;
+function loadShopItems() {
+    fetch('/api/shop/items')
+        .then(res => res.json())
+        .then(data => {
+            ['toys', 'hats', 'collars'].forEach(category => {
+                const list = document.getElementById(`${category}-list`);
+                list.innerHTML = '';
+                for (const [key, item] of Object.entries(data[category])) {
+                    const li = document.createElement('li');
+                    li.innerHTML = `${item.displayName} - ${item.price} coins
+                        <button onclick="buyItem('${category}', '${key}')">Buy</button>`;
+                    list.appendChild(li);
+                }
+            });
+        });
+}
 
-      html += `<div class="category">
-        <h2>${category.charAt(0).toUpperCase() + category.slice(1)}</h2>`;
-
-      for (const [item, price] of Object.entries(items)) {
-        const canAfford = price <= data.currency;
-        html += `<div class="item">
-          <span>${item.replace('_', ' ')} (${price} coins)</span>
-          <button onclick="buyItem('${category}', '${item}', ${price})"
-                  ${canAfford ? '' : 'disabled'}>
-            Buy
-          </button>
-        </div>`;
-      }
-
-      html += `</div>`;
-    }
-
-    document.getElementById('shop-container').innerHTML = html;
-    document.getElementById('currency').textContent = data.currency;
-  }
-
-  async function buyItem(type, name, price) {
-    const response = await fetch('/api/store/buy', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': '{{ csrf_token() }}'
-      },
-      body: JSON.stringify({ type, name })
+function buyItem(category, item) {
+    fetch('/api/shop/buy', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken  // Add CSRF token to headers
+        },
+        credentials: 'include',  // Important for session cookies
+        body: JSON.stringify({ category, item })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            document.getElementById('currency').innerText = data.currency;
+            loadShopItems();  // Refresh the shop items
+        } else {
+            alert(data.error || 'Failed to purchase item.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
     });
+}
 
-    const result = await response.json();
-    if (result.success) {
-      alert(`You bought a ${name.replace('_', ' ')}!`);
-      loadShop(); // Refresh the shop display
-    } else {
-      alert(result.error || "Purchase failed");
-    }
-  }
-
-  // Load shop when page opens
-  loadShop();
+document.addEventListener('DOMContentLoaded', loadShopItems);
 </script>
 {% endblock %}

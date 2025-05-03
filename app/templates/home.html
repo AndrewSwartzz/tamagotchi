@@ -223,7 +223,7 @@ setInterval(async () => {
     } catch (error) {
         console.error("Decay error:", error);
     }
-}, 50);
+}, 5000);
 // Changed back to 5000ms (5 seconds) from 5ms
 async function callApi(endpoint, method = 'POST', body = null) {
     const response = await fetch(endpoint, {

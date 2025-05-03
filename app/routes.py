@@ -147,9 +147,20 @@ def api_decay():
         })
 
     # Normal decay logic
-    pet.health = max(0, pet.health - 1)
     pet.cleanliness = max(0, pet.cleanliness - 1)
     pet.hunger = min(100, pet.hunger + 1)
+
+    if pet.cleanliness < 20:
+        pet.health = max(0, pet.health - 1)
+    elif pet.cleanliness > 20:
+        pet.health = min(100, pet.health + 1)
+
+    if pet.hunger > 80:
+        pet.health = max(0, pet.health - 1)
+    elif pet.hunger < 80:
+        pet.health = min(100, pet.health + 1)
+
+
     db.session.commit()
 
     return jsonify(_dump_stats(current_user))
@@ -163,76 +174,6 @@ def graveyard():
     return render_template('graveyard.html', pets=graves)
 
 
-@app.route('/api/store/items')
-@login_required
-def get_store_items():
-    store = Store.query.first()
-    return jsonify({
-        "toys": store.toys,
-        "hats": store.hats,
-        "collars": store.collars,
-        "currency": current_user.currency
-    })
-
-
-@app.route('/api/store/buy', methods=['POST'])
-@login_required
-def buy_item():
-    data = request.get_json()
-    item_type = data.get('type')
-    item_name = data.get('name')
-
-    if not item_type or not item_name:
-        return jsonify({"error": "Missing item type or name"}), 400
-
-    # Get store prices
-    store = Store.query.first()
-    if not store:
-        return jsonify({"error": "Store not found"}), 404
-
-    prices = getattr(store, item_type, {})
-    price = prices.get(item_name)
-
-    if not price:
-        return jsonify({"error": "Item not found"}), 404
-
-
-    if current_user.currency < price:
-        return jsonify({"error": "Not enough currency"}), 400
-
-
-    inventory = Inventory.query.filter_by(user_id=current_user.id).first()
-    if not inventory:
-        inventory = Inventory(user_id=current_user.id)
-        db.session.add(inventory)
-        db.session.commit()  # Initial commit to create inventory
-
-
-    current_items = getattr(inventory, item_type, [])
-    if not isinstance(current_items, list):
-        current_items = []
-
-
-    if item_name not in current_items:
-        current_items.append(item_name)
-        setattr(inventory, item_type, current_items)
-    else:
-        return jsonify({"error": "Item already owned"}), 400
-
-
-    current_user.currency -= price
-
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "currency": current_user.currency,
-        "inventory": {
-            "toys": inventory.toys,
-            "hats": inventory.hats,
-            "collars": inventory.collars
-        }
-    })
 
 @app.route('/api/stats')
 @login_required
@@ -249,7 +190,7 @@ def logout():
 @app.route('/shop')
 @login_required
 def shop():
-    return render_template('shop.html', title='Shop')
+    return render_template('shop.html')
 
 
 @app.route('/adopt', methods=['GET', 'POST'])
@@ -315,6 +256,77 @@ def death_screen():
                              .order_by(Graveyard.death_time.desc())\
                              .first()
     return render_template('death_screen.html', pet=last_pet)
+
+
+@app.route('/api/shop/items')
+@login_required
+def api_shop_items():
+    store = Store.query.first()
+    if not store:
+        store = Store()
+        db.session.add(store)
+        db.session.commit()
+
+    return jsonify({
+        'toys': store.toys,
+        'hats': store.hats,
+        'collars': store.collars
+    })
+
+@app.route('/api/shop/buy', methods=['POST'])
+@login_required
+def buy_item():
+    data = request.get_json(force=True)  # <-- force=True avoids silent fail on invalid JSON
+    category = data.get('category')
+    item_name = data.get('item')
+
+    if not category or not item_name:
+        return jsonify({"error": "Missing category or item"}), 400
+
+    store = Store.query.first()
+    if not store:
+        return jsonify({"error": "Store not found"}), 500
+
+    category_items = getattr(store, category, {})
+    item = category_items.get(item_name)
+
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    price = item['price']
+
+    if current_user.currency < price:
+        return jsonify({"error": "Not enough currency"}), 400
+
+    current_user.currency -= price
+
+    inventory = Inventory.query.filter_by(user_id=current_user.id).first()
+    inventory_items = getattr(inventory, category, [])
+    inventory_items.append({
+        "name": item_name,
+        "displayName": item['displayName'],
+        "price": price
+    })
+    setattr(inventory, category, inventory_items)
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": f"Purchased {item['displayName']}!",
+        "currency": current_user.currency,
+        "inventory": inventory_items
+    })
+
+
+
+@app.route('/debug/auth')
+def debug_auth():
+    return jsonify({
+        'authenticated': current_user.is_authenticated,
+        'user': current_user.username if current_user.is_authenticated else None
+    })
+
 
 if __name__ == '__main__':
     app.run(debug=True)

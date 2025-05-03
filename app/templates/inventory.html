@@ -1,0 +1,100 @@
+{% extends "index.html" %}
+
+{% block content %}
+<h1>Inventory</h1>
+<div class="currency-display">Currency: {{ current_user.currency }}</div>
+
+<div class="inventory-sections">
+    <div class="inventory-section">
+        <h2>Toys</h2>
+        <div id="toys-container" class="items-container">
+            {% for toy in current_user.inventory.toys %}
+            <div class="inventory-item">
+                <span>{{ toy.replace('_', ' ') }}</span>
+                <button onclick="equipItem('toys', '{{ toy }}')">Equip</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="inventory-section">
+        <h2>Hats</h2>
+        <div id="hats-container" class="items-container">
+            {% for hat in current_user.inventory.hats %}
+            <div class="inventory-item">
+                <span>{{ hat.replace('_', ' ') }}</span>
+                <button onclick="equipItem('hats', '{{ hat }}')">Equip</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="inventory-section">
+        <h2>Collars</h2>
+        <div id="collars-container" class="items-container">
+            {% for collar in current_user.inventory.collars %}
+            <div class="inventory-item">
+                <span>{{ collar.replace('_', ' ') }}</span>
+                <button onclick="equipItem('collars', '{{ collar }}')">Equip</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function equipItem(itemType, itemName) {
+    fetch('/api/inventory/equip', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            item_type: itemType,
+            item_name: itemName
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert(data.message);
+        }
+    });
+}
+</script>
+
+<style>
+.inventory-sections {
+    display: flex;
+    gap: 20px;
+}
+
+.inventory-section {
+    flex: 1;
+}
+
+.items-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.inventory-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.currency-display {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}
