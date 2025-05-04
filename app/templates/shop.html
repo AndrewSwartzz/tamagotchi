@@ -39,9 +39,9 @@ function buyItem(category, item) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken  // Add CSRF token to headers
+            'X-CSRFToken': csrfToken
         },
-        credentials: 'include',  // Important for session cookies
+        credentials: 'include',
         body: JSON.stringify({ category, item })
     })
     .then(res => {
@@ -54,7 +54,7 @@ function buyItem(category, item) {
         if (data.success) {
             alert(data.message);
             document.getElementById('currency').innerText = data.currency;
-            loadShopItems();  // Refresh the shop items
+            loadShopItems();
         } else {
             alert(data.error || 'Failed to purchase item.');
         }

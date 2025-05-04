@@ -22,10 +22,8 @@ class Pet(db.Model):
     alive: so.Mapped[bool] = so.mapped_column(sa.Boolean)
     toy: so.Mapped[str] = so.mapped_column(sa.String(64), index=True, nullable=True)
 
-    # Foreign key to User (non-nullable)
     user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('user.id'), nullable=False)
 
-    # Relationship with User (back_populates)
     user: so.Mapped['User'] = so.relationship(back_populates='pet')
 
 
@@ -52,7 +50,6 @@ class User(UserMixin, db.Model):
         default=lambda: datetime.now(timezone.utc))
 
 
-    # One-to-one relationship with Pet (uselist=False)
     pet: so.Mapped[Optional['Pet']] = so.relationship(
         back_populates='user',
         uselist=False  # Ensures one-to-one
@@ -61,7 +58,7 @@ class User(UserMixin, db.Model):
     graves: so.Mapped[List['Graveyard']] = so.relationship(back_populates='user')
 
     inventory: so.Mapped['Inventory'] = so.relationship(
-        back_populates='user',  # Changed from backref
+        back_populates='user',
         uselist=False,
         cascade='all, delete-orphan'
     )
@@ -81,7 +78,8 @@ def default_toys():
     return {
         "Blue_Ball": {"price": 10, "displayName": "Blue Ball"},
         "Pink_Bone": {"price": 15, "displayName": "Pink Bone"},
-        "Football": {"price": 20, "displayName": "Football"}
+        "Football": {"price": 20, "displayName": "Football"},
+        "Tiny_Dude": {"price": 100, "displayName": "Tiny Dude"}
     }
 
 def default_hats():
@@ -115,7 +113,6 @@ class Graveyard(db.Model):
     original_pet_id: so.Mapped[int]
     user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('user.id'))  # Add this
 
-    # Relationship to User (optional but useful)
     user: so.Mapped['User'] = so.relationship(back_populates='graves')
 
 
@@ -124,14 +121,13 @@ def load_user(id):
     return db.session.get(User, int(id))
 
 def init_user_inventory(user: User):
-    """Initialize empty inventory for new user"""
     if not hasattr(user, 'inventory') or user.inventory is None:
         inventory = Inventory(
-            user_id=user.id,  # Explicitly set user_id
+            user_id=user.id,
             toys=[],
             hats=[],
             collars=[]
         )
         db.session.add(inventory)
-        user.inventory = inventory  # Establish the relationship
+        user.inventory = inventory
         db.session.commit()

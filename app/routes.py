@@ -7,7 +7,9 @@ import sqlalchemy as sa
 
 from app.forms import RegistrationForm, LoginForm
 from app.models import User, Pet, Graveyard, Store, Inventory, init_user_inventory
-from app import db, app, login
+from app import db, app, login, mail
+from flask_mail import Message
+from threading import Thread
 
 
 @login.user_loader
@@ -27,6 +29,33 @@ def _dump_stats(user):
     }
 
 
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+
+
+def send_pet_death_email(user, pet_name, cause):
+    subject = f"Your Tamagotchi {pet_name} has passed away"
+    sender = app.config['MAIL_DEFAULT_SENDER']
+    recipients = [user.email]
+
+    msg = Message(subject, sender=sender, recipients=recipients)
+    msg.body = f"""
+    Dear {user.username},
+
+    We're sorry to inform you that your Tamagotchi {pet_name} 
+    has passed away due to {cause}.
+
+    You can visit the memorial garden at:
+    {url_for('graveyard', _external=True)}
+
+    Sincerely,
+    The Tamagotchi Team
+    """
+
+    Thread(target=send_async_email, args=(app, msg)).start()
+
+
 def kill_pet(pet, cause="natural causes"):
     grave = Graveyard(
         pet_name=pet.username,
@@ -39,6 +68,7 @@ def kill_pet(pet, cause="natural causes"):
     db.session.delete(pet)
     db.session.commit()
 
+    send_pet_death_email(current_user._get_current_object(), pet.username, cause)
 
 @app.route('/')
 @app.route('/home')
@@ -154,6 +184,9 @@ def api_play():
 def api_decay():
     pet = Pet.query.filter_by(user_id=current_user.id).first()
 
+    if not pet:
+        return redirect(url_for('adopt'))
+
     if pet.health <= 0:
         kill_pet(pet)
         db.session.commit()
@@ -163,14 +196,22 @@ def api_decay():
             "redirect": url_for('death_screen')
         })
 
-    # Normal decay logic
     pet.cleanliness = max(0, pet.cleanliness - 1)
-    pet.happiness = max(0, pet.cleanliness - 1)
+    pet.happiness = max(0, pet.happiness - 1)
     pet.hunger = min(100, pet.hunger + 1)
 
     if pet.cleanliness < 20:
         pet.health = max(0, pet.health - 1)
     elif pet.cleanliness > 20:
+        pet.health = min(100, pet.health + 1)
+
+    if pet.happiness < 20:
+        pet.health = max(0, pet.health - 1)
+        if pet.mood != 'Sad':
+            pet.mood = 'Sad'
+    elif pet.happiness > 20:
+        if pet.mood == 'Sad':
+            pet.mood = 'Happy'
         pet.health = min(100, pet.health + 1)
 
     if pet.hunger > 80:
@@ -214,6 +255,9 @@ def shop():
 @app.route('/adopt', methods=['GET', 'POST'])
 @login_required
 def adopt():
+    pet = Pet.query.filter_by(user_id=current_user.id).first()
+    if pet:
+        return redirect(url_for('home'))
     if request.method == 'POST':
         selected_pet = request.form.get('pet')
         if selected_pet:
@@ -226,6 +270,9 @@ def adopt():
 @app.route('/name_pet', methods=['GET', 'POST'])
 @login_required
 def name_pet():
+    pet = Pet.query.filter_by(user_id=current_user.id).first()
+    if pet:
+        return redirect(url_for('home'))
     selected_pet_type = session.get('selected_pet', 'duck')
 
     if request.method == 'POST':
@@ -302,28 +349,31 @@ def buy_item():
         item_name = data.get('item')
         inventory = Inventory.query.filter_by(user_id=current_user.id).first()
 
-        # Validate input
         if not category or not item_name:
             return jsonify({"error": "Missing category or item"}), 400
 
-        # Refresh the user and inventory objects
         db.session.refresh(current_user)
         if inventory:
             db.session.refresh(inventory)
 
-        # Get store item
         store = Store.query.first()
         store_items = getattr(store, category, {})
         if item_name not in store_items:
             return jsonify({"error": "Item not found"}), 404
 
+        if inventory:
+            items = getattr(inventory, category, []) or []
+            if item_name in items:
+                return jsonify({
+                    "error": f"You already own this {category[:-1]}!",
+                    "code": "duplicate_item"
+                }), 400
+
         price = store_items[item_name]['price']
 
-        # Check user can afford
         if current_user.currency < price:
             return jsonify({"error": "Not enough currency"}), 400
 
-        # Ensure inventory exists (with proper initialization)
         if not inventory:
             inventory = Inventory(
                 user_id=current_user.id,
@@ -332,55 +382,35 @@ def buy_item():
                 collars=[]
             )
             db.session.add(inventory)
-            # Force immediate persist
             db.session.flush()
 
-        # Get current list (create new list if None)
         items = getattr(inventory, category, []) or []
-
-        # Create new list with added item (to ensure change detection)
         new_items = items.copy()
         new_items.append(item_name)
         setattr(inventory, category, new_items)
 
-        # Deduct currency
-        #current_user.currency -= price
+        current_user.currency -= price
 
-        # Mark as changed
         from sqlalchemy.orm.attributes import flag_modified
         flag_modified(inventory, category)
 
-        # Commit changes
         db.session.commit()
-
-        # Verify the change persisted
-        db.session.refresh(inventory)
-        persisted_items = getattr(inventory, category, [])
-        print(f"Persisted {category}: {persisted_items}")  # Debug log
 
         return jsonify({
             "success": True,
             "message": f"Purchased {store_items[item_name]['displayName']}!",
             "currency": current_user.currency,
-            "inventory": persisted_items  # Return the verified state
+            "inventory": new_items
         })
 
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-@app.route('/debug/auth')
-def debug_auth():
-    return jsonify({
-        'authenticated': current_user.is_authenticated,
-        'user': current_user.username if current_user.is_authenticated else None
-    })
-
 
 @app.route('/inventory')
 @login_required
 def inventory():
-    # Get user's inventory or create empty one if none exists
     inventory = Inventory.query.filter_by(user_id=current_user.id).first()
     if not inventory:
         inventory = Inventory(
@@ -392,14 +422,12 @@ def inventory():
         db.session.add(inventory)
         db.session.commit()
 
-    # Get store items for display names
     store = Store.query.first()
     if not store:
         store = Store()
         db.session.add(store)
         db.session.commit()
 
-    # Prepare inventory data with display names
     inventory_data = {
         'toys': [],
         'hats': [],
@@ -432,20 +460,15 @@ def use_inventory_item():
         if not category or not item_name:
             return jsonify({"error": "Missing category or item"}), 400
 
-        # Get user's inventory
         inventory = Inventory.query.filter_by(user_id=current_user.id).first()
         if not inventory:
             return jsonify({"error": "No inventory found"}), 404
 
-        # Get the item list for the category
         items = getattr(inventory, category, [])
 
-        # Check if item exists in inventory
         if item_name not in items:
             return jsonify({"error": "Item not in inventory"}), 404
 
-        # Here you would add logic for using/equipping the item
-        # For example, equipping a hat:
         pet = Pet.query.filter_by(user_id=current_user.id).first()
         if category == 'hats' or category == 'collars':
             pet.clothing = item_name
@@ -456,10 +479,6 @@ def use_inventory_item():
             message = f"Used {item_name}! Your pet is happy!"
         else:
             message = f"Used {item_name}!"
-
-        # Remove the item from inventory if it's consumable
-        # items.remove(item_name)
-        # setattr(inventory, category, items)
 
         db.session.commit()
 

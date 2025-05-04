@@ -41,28 +41,49 @@
             overflow: hidden;
         }
 
-.tamagotchi-buttons {
-    display: flex;
-    flex-direction: row;  /* Changed from column to row */
-    justify-content: center;  /* Center the buttons horizontally */
-    align-items: flex-end;  /* Align to bottom */
-    position: absolute;
-    bottom: 20px;  /* Distance from bottom */
-    width: 100%;  /* Full width of container */
-    padding: 0 20px;  /* Add some padding on sides */
-    gap: 100px;  /* Space between buttons */
-}
+        .tamagotchi-buttons {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-end;
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            padding: 0 20px;
+            gap: 100px;
+        }
 
-.tamagotchi-button {
-    width: 30px;
-    height: 30px;
-    background-color: #ff6666;
-    border-radius: 50%;
-    border: 3px solid #333;
-    cursor: pointer;
-    position: relative;  /* Changed from absolute to relative */
-    /* Remove absolute positioning to let flexbox handle layout */
-}
+                .tamagotchi-button {
+            width: 30px;
+            height: 30px;
+            background-color: #ff6666;
+            border-radius: 50%;
+            border: 3px solid #333;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #back-button::before {
+            content: "";
+            display: block;
+            width: 12px;
+            height: 12px;
+            border-left: 3px solid #333;
+            border-bottom: 3px solid #333;
+            transform: rotate(45deg);
+            margin-right: 2px;
+        }
+
+        #back-button::after {
+            content: "";
+            display: block;
+            width: 10px;
+            height: 3px;
+            background-color: #333;
+        }
 
         .tamagotchi-button:hover {
             background-color: #ff3333;
@@ -92,30 +113,80 @@
         }
 
         .tamagotchi-pet {
-        width: 100px;
-        height: 100px;
-        position: absolute;  /* Changed from relative to absolute */
-        top: 25%;            /* Center vertically */
-        left: 32%;           /* Center horizontally */
-        transform: translate(-50%, -50%) translateX(-20%); /* Centering transform + your animation */
-            animation:  jumping-image-abrupt 0.5s steps(1, end) infinite;
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 25%;
+            left: 32%;
+            transform: translate(-50%, -50%) translateX(-20%);
+            animation: jumping-image-abrupt 0.5s steps(1, end) infinite;
+        }
 
-    }
+        .jumping-image-abrupt {
+            animation: jumpAbrupt 1s steps(1, end) infinite;
+        }
 
-.jumping-image-abrupt {
-  animation: jumpAbrupt 1s steps(1, end) infinite;
-}
+        @keyframes jumpAbrupt {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(30px);
+            }
+        }
 
-@keyframes jumpAbrupt {
-  0%, 100% {
-    transform: translateX(0);
+        .logout-button {
+            position: relative;
+            background-color: #ff6666; /* Keep original button color */
+        }
 
-  }
-  50% {
-    transform: translateX(30px);
-  }
-}
+        .logout-button::before,
+        .logout-button::after {
+            content: "";
+            position: absolute;
+            background-color: #333;
+        }
 
+        .logout-button::before {
+            width: 16px;
+            height: 20px;
+            border: 2px solid #333;
+            border-radius: 2px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .logout-button::after {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            top: 50%;
+            left: 60%;
+            transform: translate(-50%, -50%);
+        }
+
+        .logout-button:hover::before {
+            animation: door-open 0.5s ease;
+        }
+
+        @keyframes door-open {
+            0% { transform: translate(-50%, -50%); }
+            50% { transform: translate(-70%, -50%); }
+            100% { transform: translate(-50%, -50%); }
+        }
+
+        .graveyard-button {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            text-shadow: 1px 1px 1px #333;
+        }
     </style>
 </head>
 <body>
@@ -123,35 +194,49 @@
         <div class="tamagotchi-antenna"></div>
         <div class="tamagotchi-antenna-ball"></div>
 
-<div class="tamagotchi-screen" style="height: 475px; overflow: hidden;">
-    {% block content %}{% endblock %}
-</div>
+        <div class="tamagotchi-screen" style="height: 475px; overflow: hidden;">
+            {% block content %}{% endblock %}
         </div>
 
         <div class="tamagotchi-buttons">
-            <a href="/welcome" class="tamagotchi-button"></a>
-            <a href="/logout" class="tamagotchi-button"></a>
-            <div class="tamagotchi-button" onclick="alert('C button pressed!')"></div>
-        </div>
-
-
+        <div class="tamagotchi-button" id="back-button" title="Back & Refresh"></div>
+        <a href="/graveyard" class="tamagotchi-button graveyard-button" title="Memorial">RIP</a>
+        <a href="/logout" class="tamagotchi-button logout-button" title="Log Out"></a>
     </div>
-</body>
-<script>
-  // Global helper: callApi(url, body) automatically sends CSRF header
-  function callApi(url, body = {}) {
-    const csrfToken = document
-      .querySelector('meta[name="csrf-token"]')
-      .getAttribute('content');
+    </div>
 
-    return fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
-      },
-      body: JSON.stringify(body)
-    }).then(r => r.json());
-  }
-</script>
+    <script>
+
+        function loadTamagotchi() {
+            const container = document.getElementById('tamagotchi-pet-container');
+
+            container.innerHTML = '';
+
+
+
+            callApi('/get-pet-state').then(data => {
+                if (data.hungry) {
+                    pet.style.filter = 'brightness(0.8)';
+                }
+            });
+        }
+
+
+        document.getElementById('back-button').addEventListener('click', function() {
+            localStorage.setItem('forceRefresh', Date.now());
+            window.history.back();
+        });
+
+        window.addEventListener('pageshow', function(event) {
+            if (localStorage.getItem('forceRefresh')) {
+                localStorage.removeItem('forceRefresh');
+                if (event.persisted || performance.navigation.type === 2) {
+                    window.location.reload();
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadTamagotchi);
+    </script>
+</body>
 </html>

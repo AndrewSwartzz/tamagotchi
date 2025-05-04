@@ -52,7 +52,7 @@
   .button-column {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Align buttons to bottom */
+    justify-content: flex-end;
     height: 100%;
   }
 
@@ -71,23 +71,79 @@
     margin-left: 8px;
     font-weight: bold;
   }
-</style>
-<div class="flex-container">
 
+  #bubbles-effect {
+    pointer-events: none;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  #food-effect {
+    position: absolute;
+    top: 90%;
+    left: 110%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  @keyframes playAnimation {
+    0% { transform: translateY(0); }
+    25% { transform: translateY(-20px); }
+    50% { transform: translateY(0); }
+    75% { transform: translateY(-20px); }
+    100% { transform: translateY(0); }
+  }
+
+  .playing {
+    animation: playAnimation 0.4s steps(1, jump-start) 2;
+  }
+
+  #food-effect {
+    position: absolute;
+    top: 90%;
+    left: 120%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+    z-index: 5;
+    pointer-events: none;
+    image-rendering: pixelated;
+  }
+
+  @keyframes eatAnimation {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    20% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+    40% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+    60% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+    80% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.4; }
+    100% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  }
+
+  .eating {
+    animation: eatAnimation 0.8s steps(3, jump-end) forwards;
+  }
+</style>
+
+<div class="flex-container">
   <div class="flex-column">
     <div class="button">
-    <button onclick="api_play()" id="playBtn" style="height:75px;width:120px;font-size:35px">Play</button>
-    </div>
-    <div class="button" >
-    <button onclick="api_clean()" id="cleanBtn" style="height:75px;width:120px;font-size:35px">Clean</button>
-    </div>
-    <div class="button" >
-    <button onclick="api_feed()" id="feedBtn" style="height:75px;width:120px;font-size:35px">Feed</button>
+      <button onclick="api_play()" id="playBtn" style="height:75px;width:120px;font-size:35px">Play</button>
     </div>
     <div class="button">
-        <a href="{{ url_for('inventory') }}">
-    <button style="height:75px;width:120px;font-size:24px">Inventory</button>
-        </a>
+      <button onclick="api_clean()" id="cleanBtn" style="height:75px;width:120px;font-size:35px">Clean</button>
+    </div>
+    <div class="button">
+      <button onclick="api_feed()" id="feedBtn" style="height:75px;width:120px;font-size:35px">Feed</button>
+    </div>
+    <div class="button">
+      <a href="{{ url_for('inventory') }}">
+        <button style="height:75px;width:120px;font-size:24px">Inventory</button>
+      </a>
     </div>
     <div class="button">
       <a href="{{ url_for('shop') }}">
@@ -108,17 +164,17 @@
         <progress id="healthBar" value="{{ pet.health }}" max="100"></progress>
         <span id="healthVal">{{ pet.health }}%</span>
       </div>
-<div class="stat">
-    <label for="cleanlinessBar">Cleanliness:</label>
-    <progress id="cleanlinessBar" value="{{ pet.cleanliness }}" max="100"></progress>
-    <span id="cleanlinessVal">{{ pet.cleanliness }}%</span>
-</div>
-        <div class="stat">
+      <div class="stat">
+        <label for="cleanlinessBar">Cleanliness:</label>
+        <progress id="cleanlinessBar" value="{{ pet.cleanliness }}" max="100"></progress>
+        <span id="cleanlinessVal">{{ pet.cleanliness }}%</span>
+      </div>
+      <div class="stat">
         <label for="hungerBar">Hunger:</label>
         <progress id="hungerBar" value="{{ pet.hunger }}" max="100"></progress>
         <span id="hungerVal">{{ pet.hunger }}%</span>
       </div>
-        <div class="stat">
+      <div class="stat">
         <label for="happinessBar">Happiness:</label>
         <progress id="happinessBar" value="{{ pet.happiness }}" max="100"></progress>
         <span id="happinessVal">{{ pet.happiness }}%</span>
@@ -133,122 +189,203 @@
   </div>
 </div>
 
-</div>
-
-
-
 <div class="tamagotchi-pet">
-    <!-- Your Tamagotchi pet would go here -->
+  <img src="../static/{{ pet.pet_type }}.png" height="350" width="350" class="jumping-image-abrupt" id="pet-image"/>
 
 
-    <img src="../static/{{ pet.pet_type }}.png" height="350" width="350" class="jumping-image-abrupt" id="pet-image"/>
+  {% if pet.clothing in ['Blue_green_Collar', 'Red_Collar', 'Rainbow_Collar'] %}
+  <img src="../static/accessories/{{ pet.clothing }}.png"
+       class="jumping-image-abrupt accessory-image"
+       style="position: absolute;
+              top: -9%;
+              left: -9%;
+              width: 365px;
+              z-index: 10;"/>
+  {% endif %}
+  {% if pet.clothing in ['IC_Hat', 'Tree_Hat', 'Checker_Hat'] %}
+  <img src="../static/accessories/{{ pet.clothing }}.png"
+       class="jumping-image-abrupt accessory-image"
+       id="accessory-image"
+       style="position: absolute;
+              top: -9%;
+              left: -9%;
+              width: 365px;
+              z-index: 10;"/>
+  {% endif %}
+  {% if pet.toy in ['Blue_Ball', 'Football', 'Pink_Bone'] %}
+  <img src="../static/toys/{{ pet.toy }}.png"
+       style="position: absolute;
+              top: -9%;
+              left: -9%;
+              width: 365px;
+              z-index: 10;"/>
+  {% endif %}
 
-    <!-- Conditional accessory -->
-    {% if pet.clothing in ['Blue_green_Collar', 'Red_Collar', 'Rainbow_Collar'] %}
-    <img src="../static/accessories/{{ pet.clothing }}.png"
-         class="jumping-image-abrupt accessory-image"
-         style="position: absolute;
-                top: -9%;
-                left: -9%;
-                width: 365px;
-                z-index: 10;"/>
-    {% endif %}
-    {% if pet.clothing in ['IC_Hat', 'Tree_Hat', 'Checker_Hat'] %}
-    <img src="../static/accessories/{{ pet.clothing }}.png"
-         class="jumping-image-abrupt accessory-image"
-         style="position: absolute;
-                top: -9%;
-                left: -9%;
-                width: 365px;
-                z-index: 10;"/>
-    {% endif %}
-    {% if pet.toy in ['Blue_Ball', 'Football', 'Pink_Bone'] %}
-    <img src="../static/toys/{{ pet.toy }}.png"
-         style="position: absolute;
-                top: -9%;
-                left: -9%;
-                width: 365px;
-                z-index: 10;"/>
-    {% endif %}
+    {% if pet.toy in ['Tiny_Dude'] %}
+  <img src="../static/toys/{{ pet.toy }}.png"
+       style="position: absolute;
+              top: 250%;
+              left: 60%;
+              width: 100px;
+              z-index: 10;"/>
+  {% endif %}
 
 
-  <style>
-  /* ... your existing CSS ... */
-</style>
-<div class="flex-container">
-  <!-- ... your existing side buttons ... -->
-  <div class="info-column">
-    <!-- ... your pet status info boxes ... -->
-  </div>
+  <img src="../static/stink.png"
+       id="stink"
+       style="position: absolute;
+              top: -9%;
+              left: -9%;
+              width: 365px;
+              z-index: -10;
+              opacity: 0;">
+
+  <img src="../static/cry.png"
+       id="cry"
+       class="jumping-image-abrupt accessory-image"
+       style="position: absolute;
+              top: -9%;
+              left: -9%;
+              width: 365px;
+              z-index: 10;
+              opacity: 0;">
+
+  <img src="../static/bubbles.png"
+       class="jumping-image-abrupt accessory-image"
+       id="bubbles-effect"
+       style="position: absolute;
+              top: -9%;
+              left: -9%;
+              width: 365px;
+              opacity: 0;
+              transition: opacity 0.5s;
+              z-index: 5;">
+
+
+  <img id="food-effect" style="display: none;"/>
 </div>
-
-
-<!-- NEW: link or button to test the Pixel Grid -->
-<p>
-
-</p>
 
 <script>
-// No local callApi; use global helper with CSRF support
+
+const foodOptions = [
+  'pizza.png',
+  'leaf.png',
+  'burger.png',
+];
 
 function refreshBars(d) {
     healthBar.value = d.health;
-    cleanlinessBar.value = d.cleanliness;  // Changed from happiness
+    cleanlinessBar.value = d.cleanliness;
     hungerBar.value = d.hunger;
     happinessBar.value = d.happiness;
-    // Remove energy references if not used
 
     healthVal.textContent = d.health + '%';
-    cleanlinessVal.textContent = d.cleanliness + '%';  // Changed from happiness
+    cleanlinessVal.textContent = d.cleanliness + '%';
     hungerVal.textContent = d.hunger + '%';
     happinessVal.textContent = d.happiness + '%';
     document.getElementById('moneyDisplay').textContent = d.money;
+
+
+    const stink = document.getElementById('stink');
+    stink.style.opacity = d.cleanliness < 20 ? '1' : '0';
+
+
+    const cry = document.getElementById('cry');
+    cry.style.opacity = d.happiness < 20 ? '1' : '0';
 }
 
-// Update these variable declarations:
-const healthBar = document.getElementById('healthBar');
-const cleanlinessBar = document.getElementById('cleanlinessBar');  // Changed
-const hungerBar = document.getElementById('hungerBar');
-const happinessBar = document.getElementById('happinessBar');
-const healthVal = document.getElementById('healthVal');
-const cleanlinessVal = document.getElementById('cleanlinessVal');  // Changed
-const hungerVal = document.getElementById('hungerVal');
-const happinessVal = document.getElementById('happinessVal');
+async function api_feed() {
 
+    const randomFood = foodOptions[Math.floor(Math.random() * foodOptions.length)];
+    const foodEffect = document.getElementById('food-effect');
 
-document.getElementById('feedBtn').addEventListener('click', async () => {
+    foodEffect.style.left = '110%';
+
+    foodEffect.src = `../static/food/${randomFood}`;
+    foodEffect.style.display = 'block';
+    foodEffect.style.opacity = '1';
+    foodEffect.style.transform = 'translate(-50%, -50%) scale(1)';
+    foodEffect.classList.add('eating');
+
     const data = await callApi('/api/feed');
+
+    setTimeout(() => {
+        foodEffect.style.opacity = '0';
+        foodEffect.classList.remove('eating');
+        setTimeout(() => {
+            foodEffect.style.display = 'none';
+        }, 100);
+    }, 800);
+
     if (data.message) {
-        alert(data.message);  // Show the message in an alert
+        alert(data.message);
     }
     refreshBars(data);
-});
+}
+
 
 document.getElementById('cleanBtn').addEventListener('click', async () => {
+    const bubbles = document.getElementById('bubbles-effect');
+    const stink = document.getElementById('stink');
+
+    bubbles.style.opacity = '1';
+    stink.style.opacity = '0';
+
     const data = await callApi('/api/clean');
+
+    setTimeout(() => {
+        bubbles.style.opacity = '0';
+    }, 2000);
+
     if (data.message) {
-        alert(data.message);  // Show the message in an alert
+        alert(data.message);
     }
     refreshBars(data);
 });
 
+
 document.getElementById('playBtn').addEventListener('click', async () => {
-    const data = await callApi('/api/play');
-    if (data.message) {
-        alert(data.message);  // Show the message in an alert
+    try {
+        const petImg = document.getElementById('pet-image');
+        const accessoryImg = document.getElementById('accessory-image');
+        const cry = document.getElementById('cry');
+
+        // Start animation
+        petImg.classList.add('playing');
+        if (accessoryImg) accessoryImg.classList.add('playing');
+        cry.style.opacity = '0';
+
+        // Make API call
+        const data = await callApi('/api/play');
+
+        // Check for error response
+        if (data.error) {
+            alert(data.error);
+        } else if (data.message) {
+            alert(data.message);
+        }
+
+        // Update stats
+        refreshBars(data);
+
+        // End animation after delay
+        setTimeout(() => {
+            petImg.classList.remove('playing');
+            if (accessoryImg) accessoryImg.classList.remove('playing');
+        }, 1000);
+
+    } catch (error) {
+        console.error("Play error:", error);
+        alert("Failed to play with pet");
     }
-    refreshBars(data);
 });
-// Every 5 seconds ask server to decay stats
 
 setInterval(async () => {
     try {
         const data = await callApi('/api/decay');
 
         if (data.status === "dead") {
-            // Show death message with a delay
             alert(data.message);
-            // Redirect after 2 seconds (let user read the message)
             setTimeout(() => {
                 window.location.href = data.redirect;
             }, 2000);
@@ -258,14 +395,14 @@ setInterval(async () => {
     } catch (error) {
         console.error("Decay error:", error);
     }
-}, 5000);
-// Changed back to 5000ms (5 seconds) from 5ms
+}, 500);
+
 async function callApi(endpoint, method = 'POST', body = null) {
     const response = await fetch(endpoint, {
         method: method,
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token() }}'  // If using Flask-WTF CSRF
+            'X-CSRFToken': '{{ csrf_token() }}'
         },
         body: body ? JSON.stringify(body) : null
     });
@@ -273,21 +410,16 @@ async function callApi(endpoint, method = 'POST', body = null) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Get references to the elements
     const petImg = document.getElementById('pet-image');
     const accessoryImg = document.querySelector('.accessory-image');
 
-    // Only proceed if there's an accessory
     if (accessoryImg) {
-        // Remove existing animation classes
         petImg.classList.remove('jumping-image-abrupt');
         accessoryImg.classList.remove('jumping-image-abrupt');
 
-        // Force reflow to reset animations
         void petImg.offsetWidth;
         void accessoryImg.offsetWidth;
 
-        // Add animation class simultaneously after a brief delay
         setTimeout(() => {
             petImg.classList.add('jumping-image-abrupt');
             accessoryImg.classList.add('jumping-image-abrupt');
@@ -296,4 +428,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
-</div>

@@ -1,43 +1,64 @@
 {% extends "index.html" %}
 
 {% block content %}
-
-<html>
-<head>
 <style>
-h1 {text-align: center;}
-.container {
-  height: 200px;
-  position: relative;
-  border: 3px solid black;
-}
+  .welcome-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 55vh;
+    padding: 20px;
+  }
 
-.center {
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-}
+  h1 {
+    text-align: center;
+    margin-bottom: 50px;
+    color: #333;
+    text-shadow: 2px 2px 0 #ff6666;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 100px;
+    margin-top: 0px;
+  }
+
+  .welcome-button {
+    height: 140px;
+    width: 240px;
+    font-size: 26px;
+    background-color: #ff6666;
+    color: white;
+    border: 4px solid #333;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s ease;
+    box-shadow: 5px 5px 0 #333;
+  }
+
+  .welcome-button:hover {
+    background-color: #ff3333;
+    transform: translateY(-5px);
+    box-shadow: 8px 8px 0 #333;
+  }
 </style>
-</head>
-<body>
 
-<h1>Welcome to the Tamagotchi Web App!</h1>
+<div class="welcome-container">
+  <h1>Welcome to the Tamagotchi Web App!</h1>
 
-<div class="center">
-    <a href="/login">
-    <button style="height:140px;width:240px;font-size:26px;margin-right:100px">Sign In</button>
+  <div class="button-container">
+    <a href="/login" class="button-link">
+      <button class="welcome-button">Sign In</button>
     </a>
 
-    <a href="/register">
-    <button href="/register" style="height:140px;width:240px;font-size:26px">Register</button>
+    <a href="/register" class="button-link">
+      <button class="welcome-button">Register</button>
     </a>
   </div>
-
-
-
-
+</div>
 
 {% endblock %}

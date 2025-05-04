@@ -91,14 +91,11 @@ img:hover {
 
 <script>
 function selectPet(element) {
-  // Remove selected class from all images
   const allImages = document.querySelectorAll('img');
   allImages.forEach(img => img.classList.remove('selected'));
 
-  // Add selected class to clicked image
   element.classList.add('selected');
 
-  // Check the corresponding radio button
   const radioInput = element.parentElement.querySelector('input[type="radio"]');
   radioInput.checked = true;
 }

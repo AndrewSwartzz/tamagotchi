@@ -54,7 +54,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle item usage/equipping
     document.querySelectorAll('.use-btn, .equip-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const category = this.dataset.category;
@@ -75,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     alert(data.message);
-                    // Refresh the page to show changes
                     window.location.reload();
                 } else {
                     alert(data.error || 'Failed to use item');
