@@ -23,6 +23,7 @@ def _dump_stats(user):
         "health": pet.health,
         "cleanliness": pet.cleanliness,
         "hunger": pet.hunger,
+        "happiness": pet.happiness
     }
 
 
@@ -131,6 +132,22 @@ def api_clean():
 
     return jsonify(_dump_stats(current_user))
 
+@app.route('/api/play', methods=['POST'])
+@login_required
+def api_play():
+    pet = Pet.query.filter_by(user_id=current_user.id).first()
+
+    if pet.happiness > 80:
+        return jsonify({
+            **(_dump_stats(current_user)),
+            "message": "Tamagotchi is happy already!"
+        })
+
+    pet.happiness = max(0, pet.happiness + 20)
+    current_user.currency += 2
+    db.session.commit()
+
+    return jsonify(_dump_stats(current_user))
 
 @app.route('/api/decay', methods=['POST'])
 @login_required
@@ -148,6 +165,7 @@ def api_decay():
 
     # Normal decay logic
     pet.cleanliness = max(0, pet.cleanliness - 1)
+    pet.happiness = max(0, pet.cleanliness - 1)
     pet.hunger = min(100, pet.hunger + 1)
 
     if pet.cleanliness < 20:
@@ -226,6 +244,7 @@ def name_pet():
                 clothing="Basic",
                 hunger=80,
                 cleanliness=80,
+                happiness=100,
                 health=100,
                 mood="Happy",
                 user_id=current_user.id,
@@ -432,7 +451,7 @@ def use_inventory_item():
             pet.clothing = item_name
             message = f"Equipped {item_name}!"
         elif category == 'toys':
-            # Add happiness to pet when using toys
+            pet.toy = item_name
             pet.mood = "Playful"
             message = f"Used {item_name}! Your pet is happy!"
         else:

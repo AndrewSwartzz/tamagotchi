@@ -39,7 +39,7 @@
     border: 3px solid #333;
     border-radius: 10px;
     padding: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
 
@@ -76,7 +76,7 @@
 
   <div class="flex-column">
     <div class="button">
-    <button style="height:75px;width:120px;font-size:26px">Activities</button>
+    <button onclick="api_play()" id="playBtn" style="height:75px;width:120px;font-size:35px">Play</button>
     </div>
     <div class="button" >
     <button onclick="api_clean()" id="cleanBtn" style="height:75px;width:120px;font-size:35px">Clean</button>
@@ -113,17 +113,21 @@
     <progress id="cleanlinessBar" value="{{ pet.cleanliness }}" max="100"></progress>
     <span id="cleanlinessVal">{{ pet.cleanliness }}%</span>
 </div>
-      <div class="stat">
+        <div class="stat">
         <label for="hungerBar">Hunger:</label>
         <progress id="hungerBar" value="{{ pet.hunger }}" max="100"></progress>
         <span id="hungerVal">{{ pet.hunger }}%</span>
+      </div>
+        <div class="stat">
+        <label for="happinessBar">Happiness:</label>
+        <progress id="happinessBar" value="{{ pet.happiness }}" max="100"></progress>
+        <span id="happinessVal">{{ pet.happiness }}%</span>
       </div>
     </div>
 
     <div class="info-box">
       <h2>Info</h2>
       <p>Mood: {{ pet.mood }}</p>
-      <p>Personality: {{ pet.personality }}</p>
       <p>Clothing: {{ pet.clothing }}</p>
     </div>
   </div>
@@ -158,6 +162,14 @@
                 width: 365px;
                 z-index: 10;"/>
     {% endif %}
+    {% if pet.toy in ['Blue_Ball', 'Football', 'Pink_Bone'] %}
+    <img src="../static/toys/{{ pet.toy }}.png"
+         style="position: absolute;
+                top: -9%;
+                left: -9%;
+                width: 365px;
+                z-index: 10;"/>
+    {% endif %}
 
 
   <style>
@@ -183,11 +195,13 @@ function refreshBars(d) {
     healthBar.value = d.health;
     cleanlinessBar.value = d.cleanliness;  // Changed from happiness
     hungerBar.value = d.hunger;
+    happinessBar.value = d.happiness;
     // Remove energy references if not used
 
     healthVal.textContent = d.health + '%';
     cleanlinessVal.textContent = d.cleanliness + '%';  // Changed from happiness
     hungerVal.textContent = d.hunger + '%';
+    happinessVal.textContent = d.happiness + '%';
     document.getElementById('moneyDisplay').textContent = d.money;
 }
 
@@ -195,9 +209,11 @@ function refreshBars(d) {
 const healthBar = document.getElementById('healthBar');
 const cleanlinessBar = document.getElementById('cleanlinessBar');  // Changed
 const hungerBar = document.getElementById('hungerBar');
+const happinessBar = document.getElementById('happinessBar');
 const healthVal = document.getElementById('healthVal');
 const cleanlinessVal = document.getElementById('cleanlinessVal');  // Changed
 const hungerVal = document.getElementById('hungerVal');
+const happinessVal = document.getElementById('happinessVal');
 
 
 document.getElementById('feedBtn').addEventListener('click', async () => {
@@ -210,6 +226,14 @@ document.getElementById('feedBtn').addEventListener('click', async () => {
 
 document.getElementById('cleanBtn').addEventListener('click', async () => {
     const data = await callApi('/api/clean');
+    if (data.message) {
+        alert(data.message);  // Show the message in an alert
+    }
+    refreshBars(data);
+});
+
+document.getElementById('playBtn').addEventListener('click', async () => {
+    const data = await callApi('/api/play');
     if (data.message) {
         alert(data.message);  // Show the message in an alert
     }

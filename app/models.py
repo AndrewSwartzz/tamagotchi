@@ -15,10 +15,12 @@ class Pet(db.Model):
     clothing: so.Mapped[str] = so.mapped_column(sa.String(64), index=True)
     hunger: so.Mapped[int] = so.mapped_column(sa.Integer())
     cleanliness: so.Mapped[int] = so.mapped_column(sa.Integer())
+    happiness: so.Mapped[int] = so.mapped_column(sa.Integer())
     health: so.Mapped[int] = so.mapped_column(sa.Integer())
     mood: so.Mapped[str] = so.mapped_column(sa.String(64), index=True)
     pet_type: so.Mapped[str] = so.mapped_column(sa.String(64))
     alive: so.Mapped[bool] = so.mapped_column(sa.Boolean)
+    toy: so.Mapped[str] = so.mapped_column(sa.String(64), index=True, nullable=True)
 
     # Foreign key to User (non-nullable)
     user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('user.id'), nullable=False)
@@ -78,7 +80,7 @@ class User(UserMixin, db.Model):
 def default_toys():
     return {
         "Blue_Ball": {"price": 10, "displayName": "Blue Ball"},
-        "Pink_Ball": {"price": 15, "displayName": "Pink Ball"},
+        "Pink_Bone": {"price": 15, "displayName": "Pink Bone"},
         "Football": {"price": 20, "displayName": "Football"}
     }
 
@@ -86,7 +88,7 @@ def default_hats():
     return {
         "Tree_Hat": {"price": 25, "displayName": "Tree Hat"},
         "Checker_Hat": {"price": 30, "displayName": "Checker Hat"},
-        "Ithaca_Hat": {"price": 35, "displayName": "Ice Cream Hat"}
+        "Ithaca_Hat": {"price": 35, "displayName": "IC Hat"}
     }
 
 def default_collars():
