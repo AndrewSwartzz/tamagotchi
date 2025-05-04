@@ -1,3 +1,7 @@
+from logging.handlers import RotatingFileHandler
+import logging
+
+
 from flask import Flask
 from flask_login import LoginManager
 from config import Config
@@ -21,3 +25,11 @@ from app import routes, models
 csrf = CSRFProtect(app)
 # Make {{ csrf_token() }} available in every template
 app.jinja_env.globals['csrf_token'] = generate_csrf
+
+handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=3)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+app.logger.addHandler(handler)
+app.logger.setLevel(logging.INFO)

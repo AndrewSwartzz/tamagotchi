@@ -29,14 +29,14 @@ class Pet(db.Model):
 
 class Inventory(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('user.id'))
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey('user.id'), nullable=False)
 
-    # Use proper SQLAlchemy 2.0 typing
-    toys: so.Mapped[dict] = so.mapped_column(sa.JSON, default=dict)
-    hats: so.Mapped[dict] = so.mapped_column(sa.JSON, default=dict)
-    collars: so.Mapped[dict] = so.mapped_column(sa.JSON, default=dict)
+    # Change to dictionary format to match Store items
+    toys: so.Mapped[list] = so.mapped_column(sa.JSON, default=list)
+    hats: so.Mapped[list] = so.mapped_column(sa.JSON, default=list)
+    collars: so.Mapped[list] = so.mapped_column(sa.JSON, default=list)
 
-    # Relationship (optional, since User has the main relationship)
+
     user: so.Mapped['User'] = so.relationship(back_populates='inventory')
 
 
@@ -59,9 +59,10 @@ class User(UserMixin, db.Model):
     graves: so.Mapped[List['Graveyard']] = so.relationship(back_populates='user')
 
     inventory: so.Mapped['Inventory'] = so.relationship(
-        backref='owner',
-        uselist=False,  # One-to-one relationship
-        cascade='all, delete-orphan')
+        back_populates='user',  # Changed from backref
+        uselist=False,
+        cascade='all, delete-orphan'
+    )
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -85,7 +86,7 @@ def default_hats():
     return {
         "Tree_Hat": {"price": 25, "displayName": "Tree Hat"},
         "Checker_Hat": {"price": 30, "displayName": "Checker Hat"},
-        "IC_Hat": {"price": 35, "displayName": "Ice Cream Hat"}
+        "Ithaca_Hat": {"price": 35, "displayName": "Ice Cream Hat"}
     }
 
 def default_collars():
@@ -121,14 +122,14 @@ def load_user(id):
     return db.session.get(User, int(id))
 
 def init_user_inventory(user: User):
-    """Initialize inventory for a user if it doesn't exist"""
-    if not user.inventory:  # Check if inventory exists
+    """Initialize empty inventory for new user"""
+    if not hasattr(user, 'inventory') or user.inventory is None:
         inventory = Inventory(
             user_id=user.id,  # Explicitly set user_id
-            toys=[],  # Empty list or starter items
+            toys=[],
             hats=[],
             collars=[]
         )
         db.session.add(inventory)
-        # No need to explicitly assign to user.inventory
-        # because backref handles it
+        user.inventory = inventory  # Establish the relationship
+        db.session.commit()

@@ -85,7 +85,9 @@
     <button onclick="api_feed()" id="feedBtn" style="height:75px;width:120px;font-size:35px">Feed</button>
     </div>
     <div class="button">
+        <a href="{{ url_for('inventory') }}">
     <button style="height:75px;width:120px;font-size:24px">Inventory</button>
+        </a>
     </div>
     <div class="button">
       <a href="{{ url_for('shop') }}">
@@ -138,7 +140,16 @@
     <img src="../static/{{ pet.pet_type }}.png" height="350" width="350" class="jumping-image-abrupt" id="pet-image"/>
 
     <!-- Conditional accessory -->
-    {% if pet.clothing and pet.clothing != 'Basic' %}
+    {% if pet.clothing in ['Blue_green_Collar', 'Red_Collar', 'Rainbow_Collar'] %}
+    <img src="../static/accessories/{{ pet.clothing }}.png"
+         class="jumping-image-abrupt accessory-image"
+         style="position: absolute;
+                top: -9%;
+                left: -9%;
+                width: 365px;
+                z-index: 10;"/>
+    {% endif %}
+    {% if pet.clothing in ['IC_Hat', 'Tree_Hat', 'Checker_Hat'] %}
     <img src="../static/accessories/{{ pet.clothing }}.png"
          class="jumping-image-abrupt accessory-image"
          style="position: absolute;

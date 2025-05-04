@@ -273,52 +273,82 @@ def api_shop_items():
         'collars': store.collars
     })
 
+
 @app.route('/api/shop/buy', methods=['POST'])
 @login_required
 def buy_item():
-    data = request.get_json(force=True)  # <-- force=True avoids silent fail on invalid JSON
-    category = data.get('category')
-    item_name = data.get('item')
+    try:
+        data = request.get_json()
+        category = data.get('category')
+        item_name = data.get('item')
+        inventory = Inventory.query.filter_by(user_id=current_user.id).first()
 
-    if not category or not item_name:
-        return jsonify({"error": "Missing category or item"}), 400
+        # Validate input
+        if not category or not item_name:
+            return jsonify({"error": "Missing category or item"}), 400
 
-    store = Store.query.first()
-    if not store:
-        return jsonify({"error": "Store not found"}), 500
+        # Refresh the user and inventory objects
+        db.session.refresh(current_user)
+        if inventory:
+            db.session.refresh(inventory)
 
-    category_items = getattr(store, category, {})
-    item = category_items.get(item_name)
+        # Get store item
+        store = Store.query.first()
+        store_items = getattr(store, category, {})
+        if item_name not in store_items:
+            return jsonify({"error": "Item not found"}), 404
 
-    if not item:
-        return jsonify({"error": "Item not found"}), 404
+        price = store_items[item_name]['price']
 
-    price = item['price']
+        # Check user can afford
+        if current_user.currency < price:
+            return jsonify({"error": "Not enough currency"}), 400
 
-    if current_user.currency < price:
-        return jsonify({"error": "Not enough currency"}), 400
+        # Ensure inventory exists (with proper initialization)
+        if not inventory:
+            inventory = Inventory(
+                user_id=current_user.id,
+                toys=[],
+                hats=[],
+                collars=[]
+            )
+            db.session.add(inventory)
+            # Force immediate persist
+            db.session.flush()
 
-    current_user.currency -= price
+        # Get current list (create new list if None)
+        items = getattr(inventory, category, []) or []
 
-    inventory = Inventory.query.filter_by(user_id=current_user.id).first()
-    inventory_items = getattr(inventory, category, [])
-    inventory_items.append({
-        "name": item_name,
-        "displayName": item['displayName'],
-        "price": price
-    })
-    setattr(inventory, category, inventory_items)
+        # Create new list with added item (to ensure change detection)
+        new_items = items.copy()
+        new_items.append(item_name)
+        setattr(inventory, category, new_items)
 
-    db.session.commit()
+        # Deduct currency
+        #current_user.currency -= price
 
-    return jsonify({
-        "success": True,
-        "message": f"Purchased {item['displayName']}!",
-        "currency": current_user.currency,
-        "inventory": inventory_items
-    })
+        # Mark as changed
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(inventory, category)
 
+        # Commit changes
+        db.session.commit()
 
+        # Verify the change persisted
+        db.session.refresh(inventory)
+        persisted_items = getattr(inventory, category, [])
+        print(f"Persisted {category}: {persisted_items}")  # Debug log
+
+        return jsonify({
+            "success": True,
+            "message": f"Purchased {store_items[item_name]['displayName']}!",
+            "currency": current_user.currency,
+            "inventory": persisted_items  # Return the verified state
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/debug/auth')
 def debug_auth():
@@ -327,6 +357,101 @@ def debug_auth():
         'user': current_user.username if current_user.is_authenticated else None
     })
 
+
+@app.route('/inventory')
+@login_required
+def inventory():
+    # Get user's inventory or create empty one if none exists
+    inventory = Inventory.query.filter_by(user_id=current_user.id).first()
+    if not inventory:
+        inventory = Inventory(
+            user_id=current_user.id,
+            toys=[],
+            hats=[],
+            collars=[]
+        )
+        db.session.add(inventory)
+        db.session.commit()
+
+    # Get store items for display names
+    store = Store.query.first()
+    if not store:
+        store = Store()
+        db.session.add(store)
+        db.session.commit()
+
+    # Prepare inventory data with display names
+    inventory_data = {
+        'toys': [],
+        'hats': [],
+        'collars': []
+    }
+
+    for category in ['toys', 'hats', 'collars']:
+        items = getattr(inventory, category, [])
+        for item_name in items:
+            store_item = getattr(store, category, {}).get(item_name)
+            display_name = store_item['displayName'] if store_item else item_name
+            inventory_data[category].append({
+                'name': item_name,
+                'displayName': display_name
+            })
+
+    return render_template('inventory.html',
+                           inventory=inventory_data,
+                           currency=current_user.currency)
+
+
+@app.route('/api/inventory/use', methods=['POST'])
+@login_required
+def use_inventory_item():
+    try:
+        data = request.get_json()
+        category = data.get('category')
+        item_name = data.get('item')
+
+        if not category or not item_name:
+            return jsonify({"error": "Missing category or item"}), 400
+
+        # Get user's inventory
+        inventory = Inventory.query.filter_by(user_id=current_user.id).first()
+        if not inventory:
+            return jsonify({"error": "No inventory found"}), 404
+
+        # Get the item list for the category
+        items = getattr(inventory, category, [])
+
+        # Check if item exists in inventory
+        if item_name not in items:
+            return jsonify({"error": "Item not in inventory"}), 404
+
+        # Here you would add logic for using/equipping the item
+        # For example, equipping a hat:
+        pet = Pet.query.filter_by(user_id=current_user.id).first()
+        if category == 'hats' or category == 'collars':
+            pet.clothing = item_name
+            message = f"Equipped {item_name}!"
+        elif category == 'toys':
+            # Add happiness to pet when using toys
+            pet.mood = "Playful"
+            message = f"Used {item_name}! Your pet is happy!"
+        else:
+            message = f"Used {item_name}!"
+
+        # Remove the item from inventory if it's consumable
+        # items.remove(item_name)
+        # setattr(inventory, category, items)
+
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": message
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
