@@ -1,0 +1,105 @@
+2025-05-04 16:27:14,054 - app - ERROR - Exception on /api/decay [POST]
+Traceback (most recent call last):
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/Downloads/tomagotchi2/app/routes.py", line 187, in api_decay
+    if pet.health <= 0:
+       ^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'health'
+2025-05-04 16:27:14,552 - app - ERROR - Exception on /api/decay [POST]
+Traceback (most recent call last):
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/Downloads/tomagotchi2/app/routes.py", line 187, in api_decay
+    if pet.health <= 0:
+       ^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'health'
+2025-05-04 16:27:15,049 - app - ERROR - Exception on /api/decay [POST]
+Traceback (most recent call last):
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/Downloads/tomagotchi2/app/routes.py", line 187, in api_decay
+    if pet.health <= 0:
+       ^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'health'
+2025-05-04 16:27:15,551 - app - ERROR - Exception on /api/decay [POST]
+Traceback (most recent call last):
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/Downloads/tomagotchi2/app/routes.py", line 187, in api_decay
+    if pet.health <= 0:
+       ^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'health'
+2025-05-04 16:27:16,049 - app - ERROR - Exception on /api/decay [POST]
+Traceback (most recent call last):
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/PycharmProjects/tamagotchi/.venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewswartz/Downloads/tomagotchi2/app/routes.py", line 187, in api_decay
+    if pet.health <= 0:
+       ^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'health'
