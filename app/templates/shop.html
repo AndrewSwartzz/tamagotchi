@@ -1,17 +1,151 @@
 {% extends "index.html" %}
 {% block content %}
-<h2>Pet Shop</h2>
-<p>Your Balance: <span id="currency">{{ current_user.currency }}</span></p>
+<style>
+    .shop-container {
+        margin: 0 auto;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
 
-<div id="shop-items">
-    <h3>Toys</h3>
-    <ul id="toys-list"></ul>
+    .shop-header {
+        position: sticky;
+        top: 0;
+        background-color: #ffcc00;
+        padding: 0px 0;
+        z-index: 10;
+        border-bottom: 2px solid #333;
+    }
 
-    <h3>Hats</h3>
-    <ul id="hats-list"></ul>
+    .shop-category {
+        margin-bottom: 0px;
+    }
 
-    <h3>Collars</h3>
-    <ul id="collars-list"></ul>
+    .category-title {
+        background-color: #ffcc00;
+        color: black;
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        display: inline-block;
+        border: 2px solid #333;
+    }
+
+    .shop-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .accessories-container {
+        display: flex;
+        gap: 20px;
+    }
+
+    .accessories-column {
+        flex: 1;
+    }
+
+    .shop-item {
+        width: 140px;
+        border: 2px solid #333;
+        border-radius: 8px;
+        padding: 8px;
+        background-color: white;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .item-image {
+    width: 100px;  /* Increased from 60px */
+    height: 100px;  /* Increased from 60px */
+    object-fit: contain;
+    image-rendering: pixelated;
+    margin-bottom: 0px;
+        margin-top: 0px;
+}
+
+    .item-image-accessory {
+    width: 100px;  /* Increased from 60px */
+    height: 100px;  /* Increased from 60px */
+    object-fit: contain;
+    image-rendering: pixelated;
+    margin-bottom: 0px;
+        margin-top: 50px;
+}
+
+    .item-name {
+        font-size: 12px;
+        font-weight: bold;
+        margin-top: 30px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .item-price {
+        font-size: 11px;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .buy-btn {
+        background-color: #ff6666;
+        color: white;
+        border: 1px solid #333;
+        border-radius: 3px;
+        padding: 3px 6px;
+        font-size: 11px;
+        cursor: pointer;
+        font-family: 'Courier New', monospace;
+        width: 100%;
+    }
+
+    .buy-btn:hover {
+        background-color: #ff3333;
+    }
+
+    .currency-display {
+        background-color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        border: 2px solid #333;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+
+    #currency {
+        font-weight: bold;
+        color: #006600;
+    }
+</style>
+<div class="shop-container">
+    <div class="shop-header">
+        <h2 style="margin: 0; display: inline;">Pet Shop</h2>
+        <div class="currency-display" style="float: right;">
+            Coins: <span id="currency">{{ current_user.currency }}</span>
+        </div>
+    </div>
+
+    <div id="shop-items">
+        <div class="shop-category">
+            <div class="category-title">Toys</div>
+            <div class="shop-items" id="toys-list"></div>
+        </div>
+
+        <div class="shop-category">
+            <div class="category-title">Accessories</div>
+            <div class="accessories-container">
+                <div class="accessories-column">
+                    <div class="category-title" style="margin-left: 0;">Hats</div>
+                    <div class="shop-items" id="hats-list"></div>
+                </div>
+                <div class="accessories-column">
+                    <div class="category-title" style="margin-left: 0;">Collars</div>
+                    <div class="shop-items" id="collars-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -25,10 +159,39 @@ function loadShopItems() {
                 const list = document.getElementById(`${category}-list`);
                 list.innerHTML = '';
                 for (const [key, item] of Object.entries(data[category])) {
-                    const li = document.createElement('li');
-                    li.innerHTML = `${item.displayName} - ${item.price} coins
-                        <button onclick="buyItem('${category}', '${key}')">Buy</button>`;
-                    list.appendChild(li);
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'shop-item';
+
+                    const img = document.createElement('img');
+                    img.alt = item.displayName;
+
+                    if (category === 'toys') {
+                        img.className = 'item-image';
+                        img.src = `/static/toys/${key}.png`;
+                    } else if (category === 'hats' || category === 'collars') {
+                        img.className = 'item-image-accessory';
+                        img.src = `/static/accessories/${key}.png`;
+                    }
+
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'item-name';
+                    nameDiv.textContent = item.displayName;
+
+                    const priceDiv = document.createElement('div');
+                    priceDiv.className = 'item-price';
+                    priceDiv.textContent = `${item.price} coins`;
+
+                    const buyBtn = document.createElement('button');
+                    buyBtn.className = 'buy-btn';
+                    buyBtn.textContent = 'Buy';
+                    buyBtn.onclick = () => buyItem(category, key);
+
+                    itemDiv.appendChild(img);
+                    itemDiv.appendChild(nameDiv);
+                    itemDiv.appendChild(priceDiv);
+                    itemDiv.appendChild(buyBtn);
+
+                    list.appendChild(itemDiv);
                 }
             });
         });

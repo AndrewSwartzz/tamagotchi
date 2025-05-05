@@ -259,7 +259,7 @@
               width: 365px;
               opacity: 0;
               transition: opacity 0.5s;
-              z-index: 5;">
+              z-index: 15;">
 
 
   <img id="food-effect" style="display: none;"/>
@@ -350,25 +350,22 @@ document.getElementById('playBtn').addEventListener('click', async () => {
         const accessoryImg = document.getElementById('accessory-image');
         const cry = document.getElementById('cry');
 
-        // Start animation
         petImg.classList.add('playing');
         if (accessoryImg) accessoryImg.classList.add('playing');
         cry.style.opacity = '0';
 
-        // Make API call
         const data = await callApi('/api/play');
 
-        // Check for error response
+
         if (data.error) {
             alert(data.error);
         } else if (data.message) {
             alert(data.message);
         }
 
-        // Update stats
         refreshBars(data);
 
-        // End animation after delay
+
         setTimeout(() => {
             petImg.classList.remove('playing');
             if (accessoryImg) accessoryImg.classList.remove('playing');

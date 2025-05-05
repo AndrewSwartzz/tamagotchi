@@ -86,7 +86,7 @@ def default_hats():
     return {
         "Tree_Hat": {"price": 25, "displayName": "Tree Hat"},
         "Checker_Hat": {"price": 30, "displayName": "Checker Hat"},
-        "Ithaca_Hat": {"price": 35, "displayName": "IC Hat"}
+        "IC_Hat": {"price": 35, "displayName": "IC Hat"}
     }
 
 def default_collars():

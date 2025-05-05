@@ -133,13 +133,13 @@ def api_feed():
     if not pet:
         return jsonify({"error": "No pet found!"}), 400
 
-    if pet.hunger < 20:
+    if pet.hunger > 80:
         return jsonify({
             **(_dump_stats(current_user)),
             "message": "Tamagotchi is not hungry!"
         })
 
-    pet.hunger = max(0, pet.hunger - 20)
+    pet.hunger = max(0, pet.hunger + 20)
     current_user.currency += 2
     db.session.commit()
 
@@ -198,7 +198,7 @@ def api_decay():
 
     pet.cleanliness = max(0, pet.cleanliness - 1)
     pet.happiness = max(0, pet.happiness - 1)
-    pet.hunger = min(100, pet.hunger + 1)
+    pet.hunger = max(0, pet.hunger - 1)
 
     if pet.cleanliness < 20:
         pet.health = max(0, pet.health - 1)
@@ -214,9 +214,9 @@ def api_decay():
             pet.mood = 'Happy'
         pet.health = min(100, pet.health + 1)
 
-    if pet.hunger > 80:
+    if pet.hunger < 20:
         pet.health = max(0, pet.health - 1)
-    elif pet.hunger < 80:
+    elif pet.hunger > 20:
         pet.health = min(100, pet.health + 1)
 
 
